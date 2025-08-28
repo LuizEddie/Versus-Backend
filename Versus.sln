@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Versus", "Versus\Versus.csproj", "{B2BAF28A-9FF0-4D93-BA99-323FDDA682AE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2BAF28A-9FF0-4D93-BA99-323FDDA682AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2BAF28A-9FF0-4D93-BA99-323FDDA682AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2BAF28A-9FF0-4D93-BA99-323FDDA682AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2BAF28A-9FF0-4D93-BA99-323FDDA682AE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {54169D26-8C3E-4B8E-B188-E66A054A416C}
+	EndGlobalSection
+EndGlobal
