@@ -16,26 +16,6 @@ internal class Program
 
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<VersusContext>();
-            try
-            {
-                if (db.Database.CanConnect())
-                {
-                    logger.LogInformation("✅ Conexão com MySQL bem-sucedida!");
-                }
-                else
-                {
-                    logger.LogError("❌ Falha na conexão com MySQL!");
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "❌ Erro ao conectar ao MySQL");
-            }
-        }
-
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
