@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using Versus.Data;
+using Versus.Services;
+using Versus.Settings;
 
 internal class Program
 {
@@ -10,8 +13,9 @@ internal class Program
         
         ConnectToMySql(builder);
         // Add services to the container.
+        AddSecrets(builder);
         AddServices(builder);
-       
+
         var app = builder.Build();
 
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -44,8 +48,23 @@ internal class Program
     private static void AddServices(WebApplicationBuilder builder)
     {
         builder.Services.AddControllers();
+        builder.Services.AddScoped<UserService>();
+        builder.Services.AddSingleton<EmailTemplateService>();
+        builder.Services.AddScoped<ResetPasswordService>();
+        builder.Services.AddTransient<EmailService>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+    }
+
+    private static void AddSecrets(WebApplicationBuilder builder)
+    {
+        builder.Configuration.AddUserSecrets<Program>();
+
+        builder.Services.Configure<EmailSettings>(
+            builder.Configuration.GetSection("EmailSettings"));
+
+        builder.Services.Configure<TokenSettings>(
+            builder.Configuration.GetSection("TokenSettings"));
     }
 }

@@ -12,8 +12,8 @@ using Versus.Data;
 namespace Versus.Migrations
 {
     [DbContext(typeof(VersusContext))]
-    [Migration("20250829184833_UserMigration")]
-    partial class UserMigration
+    [Migration("20250903230929_AddedDefaultUtcNow")]
+    partial class AddedDefaultUtcNow
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace Versus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
@@ -44,11 +44,11 @@ namespace Versus.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("Used")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<int>("Used")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -63,26 +63,30 @@ namespace Versus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("IsDeleted")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("PhotoPath")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("Updated")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");

@@ -1,0 +1,25 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+
+namespace Versus.Data
+{
+    public class VersusContextFactory : IDesignTimeDbContextFactory<VersusContext>
+    {
+        public VersusContext CreateDbContext(string[] args)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddUserSecrets<Program>(optional: true)
+                .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<VersusContext>();
+
+            var connectionString = configuration.GetConnectionString("VersusContext") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
+
+            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            
+            return new VersusContext(optionsBuilder.Options);
+        }
+    }
+}

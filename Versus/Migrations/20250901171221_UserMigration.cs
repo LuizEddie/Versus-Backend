@@ -45,12 +45,14 @@ namespace Versus.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Password = table.Column<string>(type: "longtext", nullable: false)
+                    Password = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PhotoPath = table.Column<string>(type: "longtext", nullable: false)
+                    PhotoPath = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Updated = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
