@@ -8,7 +8,7 @@ namespace Versus.Data
         public VersusContext CreateDbContext(string[] args)
         {
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json")
                 .AddUserSecrets<Program>(optional: true)
                 .Build();

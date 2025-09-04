@@ -5,6 +5,7 @@ using System.Text;
 using Versus.Data;
 using Versus.Models;
 using Versus.Models.TemplateModels;
+using Versus.Services.Exceptions;
 using Versus.Settings;
 
 namespace Versus.Services
@@ -36,7 +37,7 @@ namespace Versus.Services
 
         public string GenerateToken(string userEmail)
         {
-            DateTime expiration = DateTime.UtcNow.AddMinutes(30);
+            DateTime expiration = DateTime.UtcNow.AddMinutes(45);
             string data = $"{userEmail}|{expiration.Ticks}";
 
             using(var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_tokenSettings.SecretKey)))
@@ -50,8 +51,24 @@ namespace Versus.Services
             }
         }
 
-        public bool ValidateToken()
+        public bool ValidateTokenAsync(string token)
         {
+            string payload = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(token));
+
+            var parts = payload.Split('|');
+
+            Console.WriteLine(parts.Length);
+
+            if (parts.Length < 3) throw new TokenException("Token Inválido! Por favor clique em recuperar senha e tente novamente!");
+
+            string email = parts[0];
+            string key = parts[2];
+            if(!long.TryParse(parts[1], out long ticks)) throw new TokenException("Token Inválido! Por favor clique em recuperar senha e tente novamente!");
+
+            DateTime expiresAt = new DateTime(ticks, DateTimeKind.Utc);
+
+            if (expiresAt < DateTime.UtcNow) throw new TokenException("Token Expirado! Por favor clique em recuperar senha e tente novamente!");  //Criar TokenException
+
             return true;
         }
 

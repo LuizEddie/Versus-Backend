@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
+using System.Configuration;
 using Versus.Data;
 using Versus.Services;
 using Versus.Settings;
 
-internal class Program
+public class Program
 {
     private static void Main(string[] args)
     {
@@ -39,7 +40,6 @@ internal class Program
     private static void ConnectToMySql(WebApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("VersusContext") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
-
         builder.Services.AddDbContext<VersusContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         );
