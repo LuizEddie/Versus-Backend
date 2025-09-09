@@ -1,12 +1,15 @@
 ﻿using Microsoft.CodeAnalysis.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 using Versus.Data;
+using Versus.Dtos;
 using Versus.Models;
 using Versus.Models.TemplateModels;
 using Versus.Services.Exceptions;
 using Versus.Settings;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Versus.Services
 {
@@ -16,68 +19,96 @@ namespace Versus.Services
         private readonly EmailService _emailService;
         private readonly TokenSettings _tokenSettings;
         private readonly EmailTemplateService _templateService;
-        public ResetPasswordService(VersusContext context, EmailService emailService, IOptions<TokenSettings> tokenSettings, EmailTemplateService templateService) { 
+        public ResetPasswordService(VersusContext context, EmailService emailService, IOptions<TokenSettings> tokenSettings, EmailTemplateService templateService)
+        {
             _context = context;
             _emailService = emailService;
             _tokenSettings = tokenSettings.Value;
             _templateService = templateService;
         }
 
-        public async Task SendNewPasswordEmailAsync(User user)
+        public async Task SendNewPasswordEmailAsync(UserCreateDto user)
         {
             string userEmail = user.Email;
-            string token = GenerateToken(userEmail);
+            string token = await GenerateToken(userEmail);
             string resetLink = $"https://localhost:3000/confirmar-cadastro/{token}";
 
-            var body = await _templateService.RenderTemplateAsync("NewPassword.cshtml", new NewPasswordTemplateModel() { ResetLink = resetLink, UserName = user.Name }); 
+            var body = await _templateService.RenderTemplateAsync("NewPassword.cshtml", new NewPasswordTemplateModel() { ResetLink = resetLink, UserName = user.Name });
 
             await _emailService.SendMailAsync(userEmail, "Nova Senha", body);
             await InsertTokenAsync(token, userEmail);
         }
 
-        public string GenerateToken(string userEmail)
+        public async Task<string> GenerateToken(string userEmail)
         {
-            DateTime expiration = DateTime.UtcNow.AddMinutes(45);
-            string data = $"{userEmail}|{expiration.Ticks}";
-
-            using(var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_tokenSettings.SecretKey)))
+            try
             {
-                byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-                string hashBase64 = Convert.ToBase64String(hash);
+                await MarkTokensAsUsedByEmailAsync(userEmail);
+                DateTime expiration = DateTime.UtcNow.AddMinutes(45);
+                string data = $"{userEmail}|{expiration.Ticks}";
 
-                string token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{data}|{hashBase64}"));
+                using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_tokenSettings.SecretKey)))
+                {
+                    byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+                    string hashBase64 = Convert.ToBase64String(hash);
 
-                return token;
+                    string token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{data}|{hashBase64}"));
+
+                    return token;
+                }
             }
+            catch(DbUpdateException e)
+            {
+                throw new DbUpdateException(e.Message);
+            }
+           
         }
 
-        public bool ValidateTokenAsync(string token)
+        public async Task<TokenValidatedDto> ValidateTokenAsync(string token)
         {
-            string payload = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(token));
+            try
+            {
+                string payload = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(token));
 
-            var parts = payload.Split('|');
+                var parts = payload.Split('|');
+                //Valida composição do token
+                if (parts.Length != 3) throw new TokenException("Token Inválido! Por favor clique em recuperar senha e tente novamente!");
 
-            Console.WriteLine(parts.Length);
+                string email = parts[0];
+                //Valida se o tick do token está ok
+                if (!long.TryParse(parts[1], out long ticks)) throw new TokenException("Token Inválido! Por favor clique em recuperar senha e tente novamente!");
 
-            if (parts.Length < 3) throw new TokenException("Token Inválido! Por favor clique em recuperar senha e tente novamente!");
+                DateTime expiresAt = new DateTime(ticks, DateTimeKind.Utc);
+                //Valida se o token não expirou
+                if (expiresAt < DateTime.UtcNow) throw new TokenException("Token Expirado! Por favor clique em recuperar senha e tente novamente!");
 
-            string email = parts[0];
-            string key = parts[2];
-            if(!long.TryParse(parts[1], out long ticks)) throw new TokenException("Token Inválido! Por favor clique em recuperar senha e tente novamente!");
+                //Valida se o hash do token é legítimo
+                string recoveredHash = parts[2];
 
-            DateTime expiresAt = new DateTime(ticks, DateTimeKind.Utc);
+                using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_tokenSettings.SecretKey)))
+                {
+                    byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes($"{parts[0]}|{parts[1]}"));
+                    string hashBase64 = Convert.ToBase64String(hash);
 
-            if (expiresAt < DateTime.UtcNow) throw new TokenException("Token Expirado! Por favor clique em recuperar senha e tente novamente!");  //Criar TokenException
+                    if (hashBase64 != recoveredHash) throw new TokenException("Token inválido! Por favor clique em recuperar senha e tente novamente!");
+                }
+                //Valida se o token existe no banco
+                var tokenFromDb = await GetValidTokenByEmailAsync(email) ?? throw new TokenException("Token inválido! Por favor clique em recuperar senha e tente novamente!");
+                //Valida se o token encontrado no banco é o mesmo que está sendo validado
+                bool isTokenValid = BCrypt.Net.BCrypt.Verify(token, tokenFromDb.Token);
 
-            return true;
+                if (!isTokenValid) throw new TokenException("Token Expirado! Por favor clique em recuperar senha e tente novamente!");
+
+                return new TokenValidatedDto { Email = email, Token = token};
+            }
+            catch (FormatException)
+            {
+                throw new TokenException("Token inválido! Por favor clique em recuperar senha e tente novamente!");
+            }
         }
 
         public async Task InsertTokenAsync(string token, string email)
         {
-            DateTime now = DateTime.UtcNow;
-
-            now = new DateTime(now.Ticks - (now.Ticks % TimeSpan.TicksPerSecond));
-
             string tokenBcrypt = BCrypt.Net.BCrypt.HashPassword(token);
 
             ResetPassword rs = new ResetPassword()
@@ -90,5 +121,23 @@ namespace Versus.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task MarkTokensAsUsedByEmailAsync(string email)
+        {
+            try
+            {
+                await _context.ResetPassword.Where(x => x.Email == email).ExecuteUpdateAsync(x1 => x1.SetProperty(x2 => x2.Used, 1));
+            }
+            catch (DbUpdateConcurrencyException e)
+            {
+                throw new DbUpdateException(e.Message);
+            }
+        }
+
+        public async Task<ResetPassword> GetValidTokenByEmailAsync(string email)
+        {
+            return await _context.ResetPassword.FirstOrDefaultAsync(x => x.Email == email && x.Used == 0);
+        }
+
     }
 }

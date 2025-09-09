@@ -70,6 +70,9 @@ namespace Versus.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("IsActive")
+                        .HasColumnType("int");
+
                     b.Property<int>("IsDeleted")
                         .HasColumnType("int");
 

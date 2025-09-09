@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Configuration;
 using Versus.Data;
+using Versus.Dtos;
 using Versus.Services;
 using Versus.Settings;
 
@@ -48,6 +50,28 @@ public class Program
     private static void AddServices(WebApplicationBuilder builder)
     {
         builder.Services.AddControllers();
+        builder.Services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.InvalidModelStateResponseFactory = context =>
+            {
+                var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    e => e.Key,
+                    e => e.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                 );
+
+                var errorResponse = new ResponseDto
+                {
+                    Success = false,
+                    Message = "Um ou mais erros foram encontrados",
+                    Data = errors
+                };
+
+                return new BadRequestObjectResult( errorResponse );
+            };
+        });
+
         builder.Services.AddScoped<UserService>();
         builder.Services.AddSingleton<EmailTemplateService>();
         builder.Services.AddScoped<ResetPasswordService>();

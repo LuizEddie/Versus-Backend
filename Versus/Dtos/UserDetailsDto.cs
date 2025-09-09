@@ -2,9 +2,11 @@
 
 namespace Versus.Dtos
 {
-    public class UserReadDto
+    public class UserDetailsDto
     {
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+
     }
 }
