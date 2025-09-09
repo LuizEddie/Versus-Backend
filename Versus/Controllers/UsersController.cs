@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Versus.Data;
 using Versus.Dtos;
+using Versus.Dtos.User;
 using Versus.Models;
 using Versus.Services;
 

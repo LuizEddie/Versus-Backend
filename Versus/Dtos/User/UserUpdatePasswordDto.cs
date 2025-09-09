@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Versus.Dtos
+namespace Versus.Dtos.User
 {
     public class UserUpdatePasswordDto
     {

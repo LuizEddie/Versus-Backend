@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Versus.Data;
 using Versus.Dtos;
+using Versus.Dtos.User;
 using Versus.Services;
 using Versus.Services.Exceptions;
 
@@ -20,19 +21,18 @@ namespace Versus.Controllers
         }
 
         //PATCH: api/ResetPasswords/validate-token
-        [HttpPatch("validate-token/{token}")]
-        public async Task<ActionResult<bool>> ValidateToken(string token)
+        [HttpPatch("validate-token")]
+        public async Task<ActionResult<bool>> ValidateToken([FromBody] ValidateTokenDto dto)
         {
             try
             {
-                var validated = await _resetPasswordService.ValidateTokenAsync(token);
+                var validated = await _resetPasswordService.ValidateTokenAsync(dto.Token);
                 return Ok(new ResponseDto { Success = true, Message = "Token validado com sucesso!", Data = validated });
             }
             catch (Exception ex)
             {
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
-            
         }
 
         // PATCH: api/ResetPasswords/update-password
@@ -58,5 +58,24 @@ namespace Versus.Controllers
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
         }
+
+        // POST: api/ResetPasswords/request-recover-password
+        [HttpPost("request-recover-password")]
+        public async Task<IActionResult> RequestRecoverPassword([FromBody] RequestRecoverPasswordDto dto)
+        {
+            try
+            {
+                var user = await _userService.GetUserByEmailAsync(dto.Email);
+
+                await _resetPasswordService.SendRecoverPasswordEmailAsync(new UserCreateDto { Email = user.Email, Name = user.Name });
+
+                return Ok(new ResponseDto { Success = true, Message = "E-mail enviado, por favor verifique a sua caixa de entrada ou spam!"});
+            }
+            catch (Exception ex) {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+       
     }
 }

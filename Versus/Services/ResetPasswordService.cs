@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Versus.Data;
 using Versus.Dtos;
+using Versus.Dtos.User;
 using Versus.Models;
 using Versus.Models.TemplateModels;
 using Versus.Services.Exceptions;
@@ -31,11 +32,23 @@ namespace Versus.Services
         {
             string userEmail = user.Email;
             string token = await GenerateToken(userEmail);
-            string resetLink = $"https://localhost:3000/confirmar-cadastro/{token}";
+            string resetLink = $"https://localhost:3000/confirmar-cadastro?token={token}";
 
-            var body = await _templateService.RenderTemplateAsync("NewPassword.cshtml", new NewPasswordTemplateModel() { ResetLink = resetLink, UserName = user.Name });
+            var body = await _templateService.RenderTemplateAsync("NewPassword.cshtml", new NewPasswordTemplateModel { ResetLink = resetLink, UserName = user.Name });
 
             await _emailService.SendMailAsync(userEmail, "Nova Senha", body);
+            await InsertTokenAsync(token, userEmail);
+        }
+
+        public async Task SendRecoverPasswordEmailAsync(UserCreateDto user)
+        {
+            string userEmail = user.Email;
+            string token = await GenerateToken(userEmail);
+            string resetLink = $"https://localhost:3000/recuperar-senha?token={token}";
+
+            var body = await _templateService.RenderTemplateAsync("RecoverPassword.cshtml", new NewPasswordTemplateModel { ResetLink = resetLink, UserName = user.Name });
+
+            await _emailService.SendMailAsync(userEmail, "Recuperação de Senha", body);
             await InsertTokenAsync(token, userEmail);
         }
 

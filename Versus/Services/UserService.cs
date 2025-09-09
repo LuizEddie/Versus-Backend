@@ -1,8 +1,7 @@
 ﻿using Humanizer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Versus.Data;
-using Versus.Dtos;
+using Versus.Dtos.User;
 using Versus.Models;
 using Versus.Services.Exceptions;
 
@@ -25,11 +24,6 @@ namespace Versus.Services
 
             return new UserDetailsDto() { Email = user.Email, Id = user.Id, Name = user.Name };
 
-        }
-
-        public async Task<IEnumerable<User>> GetUsersByIsDeletedAndIsActiveAsync(int isDeleted = 0, int isActive = 1)
-        {
-            return await _context.User.Where(x => x.IsDeleted == isDeleted && x.IsActive == isActive).ToListAsync();
         }
 
         //Fazer um userInsertDto
@@ -67,13 +61,10 @@ namespace Versus.Services
 
         public async Task UpdatePasswordAsync(UserUpdatePasswordDto dto)
         {
-
-            var user = await _context.User.Where(e => e.Email == dto.Email && e.IsDeleted == 0)
-                                            .OrderByDescending(e => e.Id) 
-                                            .FirstOrDefaultAsync() ?? throw new NotFoundException("Email não encontrado");
-
             try
             {
+                var user = await GetUserByEmailAsync(dto.Email);
+
                 user.UpdatedAt = DateTime.UtcNow;
                 user.Email = dto.Email;
                 user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -85,6 +76,17 @@ namespace Versus.Services
             {
                 throw new DbConcurrencyException(ex.Message);
             }
+            catch(NotFoundException ex)
+            {
+                throw new NotFoundException(ex.Message);
+            }
+        }
+
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            return await _context.User.Where(e => e.Email == email && e.IsDeleted == 0)
+                                           .OrderByDescending(e => e.Id)
+                                           .FirstOrDefaultAsync() ?? throw new NotFoundException("Usuário não encontrado");
         }
 
         public async Task<IEnumerable<UserDetailsDto>> GetUsersByParamsAsync(UserFilterDto dto)
@@ -110,7 +112,6 @@ namespace Versus.Services
             {
                 query = query.Where(u => u.IsActive == dto.IsActive);
             }
-
 
             var result = await query.Select(u => new UserDetailsDto { Email = u.Email, Id = u.Id, Name = u.Name }).OrderByDescending(u => u.Id).ToListAsync();
 
