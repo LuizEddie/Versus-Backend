@@ -68,7 +68,7 @@ namespace Versus.Services
                 user.UpdatedAt = DateTime.UtcNow;
                 user.Email = dto.Email;
                 user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
+                user.IsActive = 1;
                 _context.User.Update(user);
                 await _context.SaveChangesAsync();
             }

@@ -94,7 +94,7 @@ namespace Versus.Controllers
                 await _userService.InsertAsync(dto);
                 await _resetPasswordService.SendNewPasswordEmailAsync(dto);
 
-                return Ok(new ResponseDto { Success = true, Message = "Usuário criado com sucesso! Um email para a definição de senha e confirmação do cadastro será enviado!" });
+                return Ok(new ResponseDto { Success = true, Message = "Usuário criado com sucesso! Um email para a definição de senha e confirmação do cadastro será enviado, verifique a sua caixa de entrada ou spam!" });
             }
             catch (Exception ex) { 
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message});
