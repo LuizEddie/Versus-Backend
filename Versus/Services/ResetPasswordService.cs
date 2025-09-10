@@ -139,7 +139,7 @@ namespace Versus.Services
         {
             try
             {
-                await _context.ResetPassword.Where(x => x.Email == email).ExecuteUpdateAsync(x1 => x1.SetProperty(x2 => x2.Used, 1));
+                await _context.ResetPassword.Where(x => x.Email == email).ExecuteUpdateAsync(x1 => x1.SetProperty(x2 => x2.Used, true));
             }
             catch (DbUpdateConcurrencyException e)
             {
@@ -147,9 +147,9 @@ namespace Versus.Services
             }
         }
 
-        public async Task<ResetPassword> GetValidTokenByEmailAsync(string email)
+        private async Task<ResetPassword> GetValidTokenByEmailAsync(string email)
         {
-            return await _context.ResetPassword.FirstOrDefaultAsync(x => x.Email == email && x.Used == 0);
+            return await _context.ResetPassword.FirstOrDefaultAsync(x => x.Email == email && x.Used == false);
         }
 
     }

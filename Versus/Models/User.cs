@@ -9,17 +9,8 @@
         public string? PhotoPath { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public int IsDeleted { get; set; } = 0;
+        public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
-        public int IsActive { get; set; } = 1;
-        public User(){}
-
-        public User(int id, string name, string email)
-        {
-            Id = id;
-            Name = name;
-            Email = email;
-        }
-
+        public bool IsActive { get; set; } = false;
     }
 }

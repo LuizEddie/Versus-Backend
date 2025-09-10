@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Configuration;
 using Versus.Data;
@@ -15,11 +16,15 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         
         ConnectToMySql(builder);
-        // Add services to the container.
         AddSecrets(builder);
         AddServices(builder);
 
+        AddJwt(builder);
+
         var app = builder.Build();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
@@ -76,9 +81,36 @@ public class Program
         builder.Services.AddSingleton<EmailTemplateService>();
         builder.Services.AddScoped<ResetPasswordService>();
         builder.Services.AddTransient<EmailService>();
+        builder.Services.AddTransient<AuthService>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                Description = "Por favor digite o seu 'Bearer {token JWT}'"
+            });
+
+            options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+            {
+                {
+                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                    {
+                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                        {
+                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
     }
 
     private static void AddSecrets(WebApplicationBuilder builder)
@@ -90,5 +122,36 @@ public class Program
 
         builder.Services.Configure<TokenSettings>(
             builder.Configuration.GetSection("TokenSettings"));
+    }
+
+    private static void AddJwt(WebApplicationBuilder builder)
+    {
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = "JwtBearer";
+            options.DefaultChallengeScheme = "JwtBearer";
+        })
+        .AddJwtBearer("JwtBearer", options =>
+        {
+
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.Zero,
+
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(jwtSettings["Key"])
+                )
+            };
+        });
+
+        builder.Services.AddAuthorization();
     }
 }

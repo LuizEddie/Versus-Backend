@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +29,13 @@ namespace Versus.Controllers
 
         // GET: api/Users
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<UserDetailsDto>>> GetUser()
         {
             var users = await _userService.GetUsersByParamsAsync(new UserFilterDto()
             {
-                IsDeleted = 0,
-                IsActive = 1,
+                IsDeleted = false,
+                IsActive = true,
             });
 
             if(users == null || !users.Any()) return NotFound(new ResponseDto{ Success = false, Message = "Usuários não encontrados!" });
@@ -43,6 +45,7 @@ namespace Versus.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<UserDetailsDto>> GetUser(int id)
         {
             var user = await _userService.GetUserDataAsync(id);
@@ -87,14 +90,14 @@ namespace Versus.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status201Created)]
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser([FromBody] UserCreateDto dto)
+        public async Task<IActionResult> PostUser([FromBody] UserCreateDto dto)
         {
             try
             {
                 await _userService.InsertAsync(dto);
                 await _resetPasswordService.SendNewPasswordEmailAsync(dto);
 
-                return Ok(new ResponseDto { Success = true, Message = "Usuário criado com sucesso! Um email para a definição de senha e confirmação do cadastro será enviado, verifique a sua caixa de entrada ou spam!" });
+                return Created(string.Empty, new ResponseDto { Success = true, Message = "Usuário criado com sucesso! Um email para a definição de senha e confirmação do cadastro será enviado, verifique a sua caixa de entrada ou spam!" });
             }
             catch (Exception ex) { 
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message});

@@ -1,6 +1,8 @@
 ﻿using Humanizer;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 using Versus.Data;
+using Versus.Dtos;
 using Versus.Dtos.User;
 using Versus.Models;
 using Versus.Services.Exceptions;
@@ -26,10 +28,9 @@ namespace Versus.Services
 
         }
 
-        //Fazer um userInsertDto
         public async Task InsertAsync(UserCreateDto dto)
         {
-            bool userExists = await _context.User.AnyAsync(u => u.Email == dto.Email && u.IsDeleted == 0);
+            bool userExists = await _context.User.AnyAsync(u => u.Email == dto.Email && u.IsDeleted == false);
 
             if (userExists) throw new InvalidOperationException("Este usuário já está cadastrado!");
 
@@ -68,7 +69,7 @@ namespace Versus.Services
                 user.UpdatedAt = DateTime.UtcNow;
                 user.Email = dto.Email;
                 user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-                user.IsActive = 1;
+                user.IsActive = true;
                 _context.User.Update(user);
                 await _context.SaveChangesAsync();
             }
@@ -76,15 +77,11 @@ namespace Versus.Services
             {
                 throw new DbConcurrencyException(ex.Message);
             }
-            catch(NotFoundException ex)
-            {
-                throw new NotFoundException(ex.Message);
-            }
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.User.Where(e => e.Email == email && e.IsDeleted == 0)
+            return await _context.User.Where(e => e.Email == email && e.IsDeleted == false)
                                            .OrderByDescending(e => e.Id)
                                            .FirstOrDefaultAsync() ?? throw new NotFoundException("Usuário não encontrado");
         }
@@ -116,6 +113,19 @@ namespace Versus.Services
             var result = await query.Select(u => new UserDetailsDto { Email = u.Email, Id = u.Id, Name = u.Name }).OrderByDescending(u => u.Id).ToListAsync();
 
             return result;
+        }
+
+        public async Task<UserDetailsDto> LoginAsync(LoginDto dto)
+        {
+                var user = await GetUserByEmailAsync(dto.Email);
+
+                if (user.IsActive == false) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+
+                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
+
+                if (!isPasswordValid) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+
+                return new UserDetailsDto { Email = user.Email, Name = user.Name, Id = user.Id};
         }
 
     }
