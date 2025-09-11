@@ -12,10 +12,12 @@ namespace Versus.Services
     public class UserService
     {
         private readonly VersusContext _context;
+        private readonly AuthService _authService;
 
-        public UserService(VersusContext context)
+        public UserService(VersusContext context, AuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
 
         public async Task<UserDetailsDto> GetUserDataAsync(int Id)
@@ -24,7 +26,7 @@ namespace Versus.Services
 
             if (user == null) return null;
 
-            return new UserDetailsDto() { Email = user.Email, Id = user.Id, Name = user.Name };
+            return new UserDetailsDto() { Email = user.Email, Id = user.Id, Name = user.Name, PhotoPath = user.PhotoPath };
 
         }
 
@@ -70,8 +72,11 @@ namespace Versus.Services
                 user.Email = dto.Email;
                 user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
                 user.IsActive = true;
+
                 _context.User.Update(user);
                 await _context.SaveChangesAsync();
+
+                await _authService.RevokeAllRefreshTokenByUserIdAsync(user.Id);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -110,22 +115,22 @@ namespace Versus.Services
                 query = query.Where(u => u.IsActive == dto.IsActive);
             }
 
-            var result = await query.Select(u => new UserDetailsDto { Email = u.Email, Id = u.Id, Name = u.Name }).OrderByDescending(u => u.Id).ToListAsync();
+            var result = await query.Select(u => new UserDetailsDto { Email = u.Email, Id = u.Id, Name = u.Name, PhotoPath = u.PhotoPath }).OrderByDescending(u => u.Id).ToListAsync();
 
             return result;
         }
 
         public async Task<UserDetailsDto> LoginAsync(LoginDto dto)
         {
-                var user = await GetUserByEmailAsync(dto.Email);
+            var user = await GetUserByEmailAsync(dto.Email);
 
-                if (user.IsActive == false) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+            if (user.IsActive == false) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
 
-                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
 
-                if (!isPasswordValid) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+            if (!isPasswordValid) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
 
-                return new UserDetailsDto { Email = user.Email, Name = user.Name, Id = user.Id};
+            return new UserDetailsDto { Email = user.Email, Name = user.Name, Id = user.Id, PhotoPath = user.PhotoPath };
         }
 
     }
