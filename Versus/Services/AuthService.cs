@@ -74,9 +74,19 @@ namespace Versus.Services
         {
             var storedToken = await _context.RefreshTokens.Include(r => r.User).FirstOrDefaultAsync(r => r.Token == token);
 
-            if (storedToken == null || storedToken.IsRevoked || storedToken.ExpiresAt < DateTime.UtcNow) return null;
-
             return storedToken;
+        }
+
+        public async Task RevokeRefreshTokenAsync(string token)
+        {
+            try
+            {
+                await _context.RefreshTokens.Where(x => x.Token == token).ExecuteUpdateAsync(x1 => x1.SetProperty(x2 => x2.IsRevoked, true));
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new DbConcurrencyException(ex.Message);
+            }
         }
     }
 }

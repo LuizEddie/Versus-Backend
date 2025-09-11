@@ -59,7 +59,13 @@ namespace Versus.Controllers
 
                 var storedToken = await _authService.GetRefreshTokenAsync(refreshTokenValue);
 
-                if (storedToken == null) return Unauthorized(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
+                if (storedToken == null || storedToken.IsRevoked) return Unauthorized(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
+
+                if (storedToken.ExpiresAt < DateTime.UtcNow)
+                {
+                    await _authService.RevokeRefreshTokenAsync(refreshTokenValue);
+                    return Unauthorized(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
+                }
 
                 var accessToken = _authService.GenerateJwtToken(storedToken.UserId);
 
