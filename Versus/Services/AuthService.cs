@@ -37,7 +37,7 @@ namespace Versus.Services
                     issuer: jwtSettings["Issuer"],
                     audience: jwtSettings["Audience"],
                     claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(15),
+                    expires: DateTime.UtcNow.AddMinutes(1),
                     signingCredentials: creds
                 );
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -48,7 +48,7 @@ namespace Versus.Services
             var refreshToken = new RefreshToken
             {
                 Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(2),
                 UserId = id
             };
 
