@@ -203,9 +203,6 @@ namespace Versus.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -215,8 +212,6 @@ namespace Versus.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("TypeId");
 
                     b.HasIndex("UserId");
 
@@ -231,27 +226,28 @@ namespace Versus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MatchDuration")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<TimeSpan?>("MatchDuration")
+                        .HasColumnType("time(6)");
 
-                    b.Property<int>("PointsPerDraw")
+                    b.Property<int?>("PointsPerDraw")
                         .HasColumnType("int");
 
-                    b.Property<int>("PointsPerLose")
+                    b.Property<int?>("PointsPerLose")
                         .HasColumnType("int");
 
-                    b.Property<int>("PointsPerWin")
+                    b.Property<int?>("PointsPerWin")
                         .HasColumnType("int");
 
-                    b.Property<int>("QtyRounds")
+                    b.Property<int?>("QtyRounds")
                         .HasColumnType("int");
 
                     b.Property<string>("TieBreaker")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("TournamentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("WinCondition")
@@ -261,6 +257,8 @@ namespace Versus.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TournamentId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("TournamentSpecs");
                 });
@@ -419,12 +417,6 @@ namespace Versus.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Versus.Models.Tournament.TournamentType", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Versus.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -432,8 +424,6 @@ namespace Versus.Migrations
                         .IsRequired();
 
                     b.Navigation("Status");
-
-                    b.Navigation("Type");
 
                     b.Navigation("User");
                 });
@@ -446,7 +436,15 @@ namespace Versus.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Versus.Models.Tournament.TournamentType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Tournament");
+
+                    b.Navigation("Type");
                 });
 #pragma warning restore 612, 618
         }

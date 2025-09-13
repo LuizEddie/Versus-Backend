@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -23,9 +24,6 @@ public class Program
 
         var app = builder.Build();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
-
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
         // Configure the HTTP request pipeline.
@@ -37,6 +35,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
@@ -82,6 +81,7 @@ public class Program
         builder.Services.AddScoped<ResetPasswordService>();
         builder.Services.AddTransient<EmailService>();
         builder.Services.AddTransient<AuthService>();
+        builder.Services.AddScoped<TournamentService>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
