@@ -7,7 +7,6 @@ using Versus.Dtos;
 using Versus.Dtos.Tournament;
 using Versus.Services;
 
-
 namespace Versus.Controllers
 {
     [Route("api/[controller]")]
@@ -35,9 +34,46 @@ namespace Versus.Controllers
 
                 await _tournamentService.InsertTournamentAsync(dto, int.Parse(userId));
 
-                return Ok(new ResponseDto { Success = true, Message = "Torneio criado com sucesso!" });
+                return Created(string.Empty, new ResponseDto { Success = true, Message = "Torneio criado com sucesso!" });
             }
             catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        // GET: api/Tournaments
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<TournamentDetailsDto>>> GetCurrentUserTournaments()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null) return Unauthorized(new ResponseDto { Success = false, Message = "Usuário inválido!" });
+
+                IEnumerable<TournamentDetailsDto> tournament = await _tournamentService.GetCurrentUserTournamentsAsync(int.Parse(userId));
+
+                return Ok(new ResponseDto { Success = true, Message = "Seus torneios foram encontrados!", Data = tournament });
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        // Get: api/Tournaments/5
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetTournamentById(int id)
+        {
+            try
+            {
+                TournamentDetailsDto tournament = await _tournamentService.GetTournamentByIdAsync(id);
+                return Ok(new ResponseDto { Success = true, Message = "Torneio encontrado!", Data = tournament });
+            }
+            catch(Exception ex)
             {
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }

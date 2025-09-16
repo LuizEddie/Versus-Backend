@@ -7,8 +7,8 @@ namespace Versus.Dtos.Tournament
     {
         [Required]
         public string Name { get; set; }
-        public List<PlayerDto>? Players { get; set; }
-        public TournamentSpecDto TournamentSpec { get; set; }
+        public List<InsertPlayerDto>? Players { get; set; }
+        public InsertTournamentSpecDto TournamentSpec { get; set; }
 
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Versus.Dtos.Tournament
 {
-    public class PlayerDto
+    public class InsertPlayerDto
     {
         [Required]
         public string Name { get; set; }

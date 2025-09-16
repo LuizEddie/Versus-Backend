@@ -30,7 +30,7 @@ namespace Versus.Controllers
         // GET: api/Users
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<UserDetailsDto>>> GetUser()
+        public async Task<ActionResult<IEnumerable<UserDetailsDto>>> GetUsers()
         {
             var users = await _userService.GetUsersByParamsAsync(new UserFilterDto()
             {

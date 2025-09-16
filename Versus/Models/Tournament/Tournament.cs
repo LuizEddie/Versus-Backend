@@ -11,5 +11,7 @@
         public TournamentStatus Status { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
+        public ICollection<Player> Players { get; set; } = new List<Player>();
+        public TournamentSpec TournamentSpec { get; set; }
     }
 }

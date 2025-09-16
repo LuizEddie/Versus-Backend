@@ -256,7 +256,8 @@ namespace Versus.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("TournamentId")
+                        .IsUnique();
 
                     b.HasIndex("TypeId");
 
@@ -401,7 +402,7 @@ namespace Versus.Migrations
             modelBuilder.Entity("Versus.Models.Tournament.Player", b =>
                 {
                     b.HasOne("Versus.Models.Tournament.Tournament", "Tournament")
-                        .WithMany()
+                        .WithMany("Players")
                         .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -431,8 +432,8 @@ namespace Versus.Migrations
             modelBuilder.Entity("Versus.Models.Tournament.TournamentSpec", b =>
                 {
                     b.HasOne("Versus.Models.Tournament.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
+                        .WithOne("TournamentSpec")
+                        .HasForeignKey("Versus.Models.Tournament.TournamentSpec", "TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -445,6 +446,14 @@ namespace Versus.Migrations
                     b.Navigation("Tournament");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("Versus.Models.Tournament.Tournament", b =>
+                {
+                    b.Navigation("Players");
+
+                    b.Navigation("TournamentSpec")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

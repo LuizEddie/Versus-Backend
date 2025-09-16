@@ -2,7 +2,7 @@
 
 namespace Versus.Dtos.Tournament
 {
-    public class TournamentSpecDto
+    public class InsertTournamentSpecDto
     {
         public int? PointsPerWin { get; set; }
         public int? PointsPerDraw { get; set; }

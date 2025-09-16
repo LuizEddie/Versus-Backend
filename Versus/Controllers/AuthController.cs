@@ -43,7 +43,7 @@ namespace Versus.Controllers
                 return Ok(new ResponseDto { Success = true, Message = "Login efetuado com sucesso!", Data = accessToken });
             }
             catch (Exception ex) { 
-                return Unauthorized(ex);
+                return Unauthorized(new ResponseDto { Success = true, Message = ex.Message});
             }
         }
 
