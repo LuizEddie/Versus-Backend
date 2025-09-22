@@ -78,5 +78,20 @@ namespace Versus.Controllers
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
         }
+
+        // PATCH: api/Tournaments/5
+        [HttpPatch("{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTournament([FromBody] UpdateTournamentDto dto, int id)
+        {
+            try
+            {
+                await _tournamentService.UpdateTournamentAsync(dto, id);
+                return Ok(new ResponseDto { Success = true, Message = "Torneio atualizado com sucesso!"});
+            }
+            catch (Exception ex) {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
     }
 }

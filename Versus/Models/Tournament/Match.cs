@@ -14,6 +14,6 @@
         public Player? Player2 { get; set; }
         public int? WinnerId { get; set; }
         public Player? Winner { get; set; }
-        public string? WinCondition { get; set; }
+        public int? Group {  get; set; }
     }
 }

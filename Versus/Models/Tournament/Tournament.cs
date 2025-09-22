@@ -13,5 +13,7 @@
         public User User { get; set; }
         public ICollection<Player> Players { get; set; } = new List<Player>();
         public TournamentSpec TournamentSpec { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }

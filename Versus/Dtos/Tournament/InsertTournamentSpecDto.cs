@@ -8,11 +8,12 @@ namespace Versus.Dtos.Tournament
         public int? PointsPerDraw { get; set; }
         public int? PointsPerLose { get; set; }
         [Required]
-        public string WinCondition { get; set; }
+        public int WinConditionId { get; set; }
         [Required]
         public int? TypeId { get; set; }
         public TimeSpan? MatchDuration { get; set; }
         public int? QtyRounds { get; set; }
-        public string? TieBreaker { get; set; }
+        public int? TieBreakerId { get; set; }
+        public int? QtyGroups { get; set; }
     }
 }

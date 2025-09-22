@@ -123,6 +123,9 @@ namespace Versus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("Group")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime(6)");
 
@@ -140,9 +143,6 @@ namespace Versus.Migrations
 
                     b.Property<int>("TournamentId")
                         .HasColumnType("int");
-
-                    b.Property<string>("WinCondition")
-                        .HasColumnType("longtext");
 
                     b.Property<int?>("WinnerId")
                         .HasColumnType("int");
@@ -193,8 +193,14 @@ namespace Versus.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -238,11 +244,14 @@ namespace Versus.Migrations
                     b.Property<int?>("PointsPerWin")
                         .HasColumnType("int");
 
+                    b.Property<int?>("QtyGroups")
+                        .HasColumnType("int");
+
                     b.Property<int?>("QtyRounds")
                         .HasColumnType("int");
 
-                    b.Property<string>("TieBreaker")
-                        .HasColumnType("longtext");
+                    b.Property<int?>("TieBreakerId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TournamentId")
                         .HasColumnType("int");
@@ -250,16 +259,19 @@ namespace Versus.Migrations
                     b.Property<int>("TypeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("WinCondition")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("WinConditionId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TieBreakerId");
 
                     b.HasIndex("TournamentId")
                         .IsUnique();
 
                     b.HasIndex("TypeId");
+
+                    b.HasIndex("WinConditionId");
 
                     b.ToTable("TournamentSpecs");
                 });
@@ -281,6 +293,23 @@ namespace Versus.Migrations
                     b.ToTable("TournamentStatuses");
                 });
 
+            modelBuilder.Entity("Versus.Models.Tournament.TournamentTieBreaker", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TournamentTieBreaker");
+                });
+
             modelBuilder.Entity("Versus.Models.Tournament.TournamentType", b =>
                 {
                     b.Property<int>("Id")
@@ -296,6 +325,23 @@ namespace Versus.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TournamentTypes");
+                });
+
+            modelBuilder.Entity("Versus.Models.Tournament.TournamentWinConditon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TournamentWinConditon");
                 });
 
             modelBuilder.Entity("Versus.Models.User", b =>
@@ -431,6 +477,10 @@ namespace Versus.Migrations
 
             modelBuilder.Entity("Versus.Models.Tournament.TournamentSpec", b =>
                 {
+                    b.HasOne("Versus.Models.Tournament.TournamentTieBreaker", "TieBreaker")
+                        .WithMany()
+                        .HasForeignKey("TieBreakerId");
+
                     b.HasOne("Versus.Models.Tournament.Tournament", "Tournament")
                         .WithOne("TournamentSpec")
                         .HasForeignKey("Versus.Models.Tournament.TournamentSpec", "TournamentId")
@@ -443,9 +493,19 @@ namespace Versus.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Versus.Models.Tournament.TournamentWinConditon", "WinCondition")
+                        .WithMany()
+                        .HasForeignKey("WinConditionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TieBreaker");
+
                     b.Navigation("Tournament");
 
                     b.Navigation("Type");
+
+                    b.Navigation("WinCondition");
                 });
 
             modelBuilder.Entity("Versus.Models.Tournament.Tournament", b =>

@@ -10,10 +10,9 @@ namespace Versus.Services
     public class TournamentService
     {
         private readonly VersusContext _context;
-        private readonly UserService _userService;
-        public TournamentService(VersusContext context, UserService userService) {
+        public TournamentService(VersusContext context)
+        {
             _context = context;
-            _userService = userService;
         }
 
         public async Task InsertTournamentAsync(InsertTournamentDto dto, int userId)
@@ -22,11 +21,11 @@ namespace Versus.Services
 
             if (!await _context.TournamentTypes.AnyAsync(x => x.Id == dto.TournamentSpec.TypeId.Value)) throw new TournamentException("Tipo de torneio inexistente, por favor selecione outro");
 
-            Tournament tournament = new ()
+            Tournament tournament = new()
             {
                 Name = dto.Name,
                 UserId = userId,
-                Players = dto.Players?.Select(p => new Player { Name = p.Name}).ToList(),
+                Players = dto.Players?.Select(p => new Player { Name = p.Name }).ToList(),
                 TournamentSpec = new TournamentSpec
                 {
                     MatchDuration = dto.TournamentSpec.MatchDuration,
@@ -34,8 +33,8 @@ namespace Versus.Services
                     PointsPerLose = dto.TournamentSpec.PointsPerLose,
                     PointsPerWin = dto.TournamentSpec.PointsPerWin,
                     QtyRounds = dto.TournamentSpec.QtyRounds,
-                    TieBreaker = dto.TournamentSpec.TieBreaker,
-                    WinCondition = dto.TournamentSpec.WinCondition,
+                    TieBreakerId = dto.TournamentSpec.TieBreakerId,
+                    WinConditionId = dto.TournamentSpec.WinConditionId,
                     TypeId = dto.TournamentSpec.TypeId.Value
                 }
             };
@@ -50,6 +49,10 @@ namespace Versus.Services
                 .Include(x => x.Players)
                 .Include(x => x.TournamentSpec)
                     .ThenInclude(x => x.Type)
+                .Include(x => x.TournamentSpec)
+                    .ThenInclude(x => x.WinCondition)
+                .Include(x => x.TournamentSpec)
+                    .ThenInclude(x => x.TieBreaker)
                 .Include(x => x.User)
                 .Include(x => x.Status)
                 .Where(x => x.UserId == userId).ToListAsync();
@@ -70,13 +73,14 @@ namespace Versus.Services
                     Id = p.Id,
                     Name = p.Name
                 }).ToList(),
-                TournamentSpecs = new TournamentSpecsDetailsDto { 
-                    Id = t.TournamentSpec.Id, 
-                    MatchDuration = (TimeSpan)t.TournamentSpec.MatchDuration,
-                    PointsPerDraw = (int)t.TournamentSpec.PointsPerDraw,
-                    PointsPerLose = (int)t.TournamentSpec.PointsPerLose,
-                    PointsPerWin = (int)t.TournamentSpec.PointsPerWin,
-                    QtyRounds = (int)t.TournamentSpec.QtyRounds,
+                TournamentSpecs = new TournamentSpecsDetailsDto
+                {
+                    Id = t.TournamentSpec.Id,
+                    MatchDuration = t.TournamentSpec.MatchDuration,
+                    PointsPerDraw = t.TournamentSpec.PointsPerDraw,
+                    PointsPerLose = t.TournamentSpec.PointsPerLose,
+                    PointsPerWin = t.TournamentSpec.PointsPerWin,
+                    QtyRounds = t.TournamentSpec.QtyRounds,
                     TieBreaker = t.TournamentSpec.TieBreaker,
                     WinCondition = t.TournamentSpec.WinCondition,
                     Type = t.TournamentSpec.Type
@@ -93,6 +97,10 @@ namespace Versus.Services
                .Include(x => x.Players)
                .Include(x => x.TournamentSpec)
                    .ThenInclude(x => x.Type)
+               .Include(x => x.TournamentSpec)
+                    .ThenInclude(x => x.WinCondition)
+                .Include(x => x.TournamentSpec)
+                    .ThenInclude(x => x.TieBreaker)
                .Include(x => x.User)
                .Include(x => x.Status)
                .Where(x => x.Id == id)
@@ -117,11 +125,11 @@ namespace Versus.Services
                 TournamentSpecs = new TournamentSpecsDetailsDto
                 {
                     Id = tournament.TournamentSpec.Id,
-                    MatchDuration = (TimeSpan)tournament.TournamentSpec.MatchDuration,
-                    PointsPerDraw = (int)tournament.TournamentSpec.PointsPerDraw,
-                    PointsPerLose = (int)tournament.TournamentSpec.PointsPerLose,
-                    PointsPerWin = (int)tournament.TournamentSpec.PointsPerWin,
-                    QtyRounds = (int)tournament.TournamentSpec.QtyRounds,
+                    MatchDuration = tournament.TournamentSpec.MatchDuration,
+                    PointsPerDraw = tournament.TournamentSpec.PointsPerDraw,
+                    PointsPerLose = tournament.TournamentSpec.PointsPerLose,
+                    PointsPerWin = tournament.TournamentSpec.PointsPerWin,
+                    QtyRounds = tournament.TournamentSpec.QtyRounds,
                     TieBreaker = tournament.TournamentSpec.TieBreaker,
                     WinCondition = tournament.TournamentSpec.WinCondition,
                     Type = tournament.TournamentSpec.Type
@@ -130,6 +138,26 @@ namespace Versus.Services
             };
 
             return tournamentDetailsDto;
+        }
+
+        public async Task UpdateTournamentAsync(UpdateTournamentDto dto, int id)
+        {
+            Tournament tournament = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == id) ?? throw new TournamentException("Torneio não encontrado!");
+
+            try
+            {
+                tournament.UpdatedAt = DateTime.UtcNow;
+                if (!string.IsNullOrEmpty(dto.Name)) tournament.Name = dto.Name;
+                if (dto.StatusId.HasValue) tournament.StatusId = dto.StatusId.Value;
+                if (dto.StatusId.HasValue && dto.StatusId.Value == 2) tournament.FinishedAt = DateTime.UtcNow;
+                if (dto.StatusId.HasValue && dto.StatusId.Value == 0) throw new TournamentException("Status do torneio é obrigatório!");
+
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new DbUpdateException(ex.Message);
+            }
         }
     }
 }
