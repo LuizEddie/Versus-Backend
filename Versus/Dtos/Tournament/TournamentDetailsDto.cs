@@ -11,5 +11,6 @@ namespace Versus.Dtos.Tournament
         public TournamentSpecsDetailsDto TournamentSpecs { get; set; }
         public TournamentStatus TournamentStatus { get; set; }
         public UserDetailsDto UserDetails { get; set; }
+        public List<MatchDetailsDto> MatchDetails { get; set; }
     }
 }

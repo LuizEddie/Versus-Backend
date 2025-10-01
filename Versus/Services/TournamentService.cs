@@ -55,7 +55,10 @@ namespace Versus.Services
                     .ThenInclude(x => x.TieBreaker)
                 .Include(x => x.User)
                 .Include(x => x.Status)
-                .Where(x => x.UserId == userId).ToListAsync();
+                .Include(x => x.Matches)
+                .Where(x => x.UserId == userId)
+                .Where(x => x.IsDeleted == false)
+                .ToListAsync();
 
             List<TournamentDetailsDto> tournamentDetailsDtos = tournaments.Select(t => new TournamentDetailsDto
             {
@@ -85,7 +88,19 @@ namespace Versus.Services
                     WinCondition = t.TournamentSpec.WinCondition,
                     Type = t.TournamentSpec.Type
                 },
-                TournamentStatus = t.Status
+                TournamentStatus = t.Status,
+                MatchDetails = t.Matches.Select(m => new MatchDetailsDto
+                {
+                    Id = m.Id,
+                    Group = m.Group,
+                    MatchDate = m.MatchDate,
+                    Phase = m.Phase,
+                    Player1 = m.Player1 == null ? null : new PlayerDetailsDto { Id = m.Player1.Id, Name = m.Player1.Name },
+                    Player2 = m.Player2 == null ? null : new PlayerDetailsDto { Id = m.Player2.Id, Name = m.Player2.Name },
+                    Round = m.Round,
+                    Winner = m.Winner == null ? null : new PlayerDetailsDto { Id = m.Winner.Id, Name = m.Winner.Name },
+                    Key = m.Key
+                }).ToList()
             }).ToList();
 
             return tournamentDetailsDtos;
@@ -103,7 +118,14 @@ namespace Versus.Services
                     .ThenInclude(x => x.TieBreaker)
                .Include(x => x.User)
                .Include(x => x.Status)
+               .Include(x => x.Matches)
+                    .ThenInclude(x => x.Player1)
+                .Include(x => x.Matches)
+                    .ThenInclude(x => x.Player2)
+                .Include(x => x.Matches)
+                    .ThenInclude(x => x.Winner)
                .Where(x => x.Id == id)
+               .Where(x => x.IsDeleted == false)
                .FirstOrDefaultAsync() ?? throw new TournamentException("Torneio não encontrado");
 
             TournamentDetailsDto tournamentDetailsDto = new TournamentDetailsDto
@@ -134,7 +156,19 @@ namespace Versus.Services
                     WinCondition = tournament.TournamentSpec.WinCondition,
                     Type = tournament.TournamentSpec.Type
                 },
-                TournamentStatus = tournament.Status
+                TournamentStatus = tournament.Status,
+                MatchDetails = tournament.Matches.Select(m => new MatchDetailsDto
+                {
+                    Id = m.Id,
+                    Group = m.Group,
+                    MatchDate = m.MatchDate,
+                    Phase = m.Phase,
+                    Player1 = m.Player1 == null ? null : new PlayerDetailsDto { Id = m.Player1.Id, Name = m.Player1.Name },
+                    Player2 = m.Player2 == null ? null : new PlayerDetailsDto { Id = m.Player2.Id, Name = m.Player2.Name },
+                    Round = m.Round,
+                    Winner = m.Winner == null ? null : new PlayerDetailsDto { Id = m.Winner.Id, Name = m.Winner.Name },
+                    Key = m.Key
+                }).ToList()
             };
 
             return tournamentDetailsDto;
@@ -156,6 +190,20 @@ namespace Versus.Services
             }
             catch (DbUpdateConcurrencyException ex)
             {
+                throw new DbUpdateException(ex.Message);
+            }
+        }
+
+        public async Task DeleteTournamentAsync(int id)
+        {
+            Tournament tournament = await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == id) ?? throw new TournamentException("Torneio não encontrado!");
+            try
+            {
+                tournament.IsDeleted = true;
+                tournament.DeletedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex) {
                 throw new DbUpdateException(ex.Message);
             }
         }

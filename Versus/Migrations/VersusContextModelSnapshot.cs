@@ -126,6 +126,9 @@ namespace Versus.Migrations
                     b.Property<int?>("Group")
                         .HasColumnType("int");
 
+                    b.Property<string>("Key")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime(6)");
 
@@ -427,7 +430,7 @@ namespace Versus.Migrations
                         .HasForeignKey("Player2Id");
 
                     b.HasOne("Versus.Models.Tournament.Tournament", "Tournament")
-                        .WithMany()
+                        .WithMany("Matches")
                         .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -510,6 +513,8 @@ namespace Versus.Migrations
 
             modelBuilder.Entity("Versus.Models.Tournament.Tournament", b =>
                 {
+                    b.Navigation("Matches");
+
                     b.Navigation("Players");
 
                     b.Navigation("TournamentSpec")

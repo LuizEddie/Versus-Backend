@@ -15,5 +15,6 @@
         public TournamentSpec TournamentSpec { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
+        public ICollection<Match> Matches { get; set; } = new List<Match>();
     }
 }

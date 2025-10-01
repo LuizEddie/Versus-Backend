@@ -73,7 +73,7 @@ namespace Versus.Controllers
                 TournamentDetailsDto tournament = await _tournamentService.GetTournamentByIdAsync(id);
                 return Ok(new ResponseDto { Success = true, Message = "Torneio encontrado!", Data = tournament });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
@@ -87,9 +87,26 @@ namespace Versus.Controllers
             try
             {
                 await _tournamentService.UpdateTournamentAsync(dto, id);
-                return Ok(new ResponseDto { Success = true, Message = "Torneio atualizado com sucesso!"});
+                return Ok(new ResponseDto { Success = true, Message = "Torneio atualizado com sucesso!" });
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        // DELETE: api/Tournaments/5
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTournament(int id)
+        {
+            try
+            {
+                await _tournamentService.DeleteTournamentAsync(id);
+                return Ok(new ResponseDto { Success = true, Message = "Torneio excluido com sucesso!" });
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
         }
