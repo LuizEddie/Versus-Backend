@@ -1,6 +1,7 @@
 ﻿using Humanizer;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Cms;
 using System.Text.Json;
 using Versus.Data;
@@ -36,27 +37,6 @@ namespace Versus.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateCurrentMatchAsync(UpdateCurrentMatchDto dto)
-        {
-            var query = _context.Matches.AsQueryable();
-
-            if (!string.IsNullOrEmpty(dto.Phase)) query = query.Where(x => x.Phase == dto.Phase);
-            if (!string.IsNullOrEmpty(dto.Round)) query = query.Where(x => x.Round == dto.Round);
-            if (dto.Group.HasValue) query = query.Where(x => x.Group == dto.Group.Value);
-
-            var result = await query.FirstOrDefaultAsync() ?? throw new TournamentException("Partida não encontrada!");
-
-            try
-            {
-                result.Player2Id = dto.Player2Id;
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                throw new DbConcurrencyException(ex.Message);
-            }
-        }
-
         public async Task SetMatchWinnerAsync(int id, int winnerId)
         {
 
@@ -80,6 +60,12 @@ namespace Versus.Services
             try
             {
                 if (!string.IsNullOrEmpty(dto.Phase)) result.Phase = dto.Phase;
+                if (!string.IsNullOrEmpty(dto.Round)) result.Round = dto.Round;
+                if (!string.IsNullOrEmpty(dto.Key)) result.Key = dto.Key;
+                if (dto.Player1Id.HasValue) result.Player1Id = dto.Player1Id;
+                if (dto.Player2Id.HasValue) result.Player2Id = dto.Player2Id;
+                if (dto.WinnerId.HasValue) result.WinnerId = dto.WinnerId;
+                if (dto.Group.HasValue) result.Group = dto.Group;
 
                 await _context.SaveChangesAsync();
             }
@@ -114,7 +100,7 @@ namespace Versus.Services
             for (int i = 0; i < parts.Count(); i++)
             {
                 var part = parts[i];
-                for (int j = 0; j < part.Count; j+= 2)
+                for (int j = 0; j < part.Count; j += 2)
                 {
                     Match match = new Match();
                     match.Player1Id = part[j].Id;
@@ -128,13 +114,50 @@ namespace Versus.Services
                 }
             }
 
-            for(int i = 0; i < matches.Count(); i++)
+            for (int i = 0; i < matches.Count(); i++)
             {
                 matches[i].Key = (i + 1).ToString();
             }
 
             _context.Matches.AddRange(matches);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<MatchDetailsDto> FindSingleMatchAsync(MatchFilterDto dto)
+        {
+            var query = _context.Matches.AsQueryable();
+            Console.WriteLine(dto.Id);
+            if (dto.Id.HasValue) query = query.Where(x => x.Id == dto.Id);
+            if (!string.IsNullOrWhiteSpace(dto.Phase)) query = query.Where(x => x.Phase == dto.Phase);
+            if (!string.IsNullOrWhiteSpace(dto.Round)) query = query.Where(x => x.Round == dto.Round);
+            if (!string.IsNullOrWhiteSpace(dto.Key)) query = query.Where(x => x.Key == dto.Key);
+            if (dto.MatchDate.HasValue) query = query.Where(x => x.MatchDate == dto.MatchDate);
+            if (dto.TournamentId.HasValue) query = query.Where(x => x.TournamentId == dto.TournamentId);
+            if (dto.Group.HasValue) query = query.Where(x => x.Group == dto.Group);
+            if (dto.Player1Id.HasValue) query = query.Where(x => x.Player1Id == dto.Player1Id);
+            if (dto.Player2Id.HasValue) query = query.Where(x => x.Player2Id == dto.Player2Id);
+            if (dto.WinnerId.HasValue) query = query.Where(x => x.WinnerId == dto.WinnerId);
+
+            var result = await query
+                .Include(x => x.Winner)
+                .Include(x => x.Player1)
+                .Include(x => x.Player2)
+                .FirstOrDefaultAsync();
+
+            if (result == null) return null;
+
+            return new MatchDetailsDto()
+            {
+                Id = result.Id,
+                Phase = result.Phase,
+                Round = result.Round,
+                Group = result.Group,
+                Key = result.Key,
+                MatchDate = result.MatchDate,
+                Player1 = result.Player1 != null ? new PlayerDetailsDto() { Id = result.Player1.Id, Name = result.Player1.Name } : null,
+                Player2 = result.Player2 != null ? new PlayerDetailsDto() { Id = result.Player2.Id, Name = result.Player2.Name } : null,
+                Winner = result.Winner != null ? new PlayerDetailsDto() { Id = result.Winner.Id, Name = result.Winner.Name } : null,
+            };
         }
 
         public IEnumerable<List<T>> SplitIntoParts<T>(List<T> list, int parts)

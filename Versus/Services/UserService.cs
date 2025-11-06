@@ -88,7 +88,7 @@ namespace Versus.Services
         {
             return await _context.User.Where(e => e.Email == email && e.IsDeleted == false)
                                            .OrderByDescending(e => e.Id)
-                                           .FirstOrDefaultAsync() ?? throw new NotFoundException("Usuário não encontrado");
+                                           .FirstOrDefaultAsync() ?? throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
         }
 
         public async Task<IEnumerable<UserDetailsDto>> GetUsersByParamsAsync(UserFilterDto dto)

@@ -36,7 +36,7 @@ namespace Versus.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = refreshToken.ExpiresAt
                 });
 
@@ -75,7 +75,7 @@ namespace Versus.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = refreshToken.ExpiresAt
                 });
 
@@ -86,8 +86,8 @@ namespace Versus.Controllers
             }
         }
 
-        //GET: api/Auth/logout
-        [HttpGet("logout")]
+        //POST: api/Auth/logout
+        [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
         {

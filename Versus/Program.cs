@@ -25,6 +25,8 @@ public class Program
 
         var app = builder.Build();
 
+        app.UseCors("AllowLocalhost");
+
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
         // Configure the HTTP request pipeline.
@@ -54,6 +56,18 @@ public class Program
 
     private static void AddServices(WebApplicationBuilder builder)
     {
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowLocalhost", policy =>
+            {
+                policy
+                .WithOrigins("https://localhost:4200", "http://localhost:4200")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+            });
+        }); 
+
         builder.Services.AddControllers()
             .AddJsonOptions(opt =>
             {

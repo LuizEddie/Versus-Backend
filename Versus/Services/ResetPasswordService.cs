@@ -32,7 +32,7 @@ namespace Versus.Services
         {
             string userEmail = user.Email;
             string token = await GenerateToken(userEmail);
-            string resetLink = $"https://localhost:3000/confirmar-cadastro?token={token}";
+            string resetLink = $"http://localhost:4200/auth/confirm-register?token={token}";
 
             var body = await _templateService.RenderTemplateAsync("NewPassword.cshtml", new NewPasswordTemplateModel { ResetLink = resetLink, UserName = user.Name });
 
@@ -44,7 +44,7 @@ namespace Versus.Services
         {
             string userEmail = user.Email;
             string token = await GenerateToken(userEmail);
-            string resetLink = $"https://localhost:3000/recuperar-senha?token={token}";
+            string resetLink = $"http://localhost:4200/auth/confirm-new-password?token={token}";
 
             var body = await _templateService.RenderTemplateAsync("RecoverPassword.cshtml", new NewPasswordTemplateModel { ResetLink = resetLink, UserName = user.Name });
 

@@ -35,12 +35,45 @@ namespace Versus.Controllers
         }
 
         //POST: api/Matches/CreateFirstKnockoutStageMatches/5
-        [HttpPost("CreateFirstKnockoutStageMatches/{tournamentId}")]
+        [HttpPost("create-first-knockout-stage-matches/{tournamentId}")]
         [Authorize]
         public async Task<IActionResult> CreateFirstKnockoutMatches(int tournamentId)
         {
             await _matchService.CreateFirstKnockoutStageMatchesAsync(tournamentId);
-            return Ok(new ResponseDto { Success = true, Message = "Teste"});
+            return Ok(new ResponseDto { Success = true, Message = "Primeira rodada do mata-mata criada com sucesso!"});
+        }
+
+        //GET: api/Matches/FindSingleMatch
+        [HttpGet("find-single-match")]
+        [Authorize]
+        public async Task<IActionResult> FindSingleMatch([FromQuery] MatchFilterDto dto)
+        {
+            try
+            {
+                MatchDetailsDto match = await _matchService.FindSingleMatchAsync(dto);
+                if (match == null) return BadRequest(new ResponseDto { Success = false, Message = "Partida não encontrada" });
+                return Ok(new ResponseDto { Success = true, Message = "Partida encontrada!", Data = match });
+            }
+            catch (Exception ex) {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        //PATCH: api/Matches/5
+        [HttpPatch("{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateMatch([FromBody] UpdateMatchDto dto, int id)
+        {
+            try
+            {
+                await _matchService.UpdateMatchAsync(id, dto);
+                return Ok(new ResponseDto { Success = true, Message = "Partida atualizada!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+
+            }
         }
     }
 }
