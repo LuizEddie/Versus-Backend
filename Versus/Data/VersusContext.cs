@@ -19,5 +19,6 @@ namespace Versus.Data
         public DbSet<Classification> Classifications { get; set; } = default!;
         public DbSet<TournamentSpec> TournamentSpecs { get; set; } = default!;
         public DbSet<TournamentTieBreaker> TournamentTieBreaker { get; set; } = default!;
+        public DbSet<TournamentWinConditon> TournamentWinConditon { get; set; } = default!;
     }
 }

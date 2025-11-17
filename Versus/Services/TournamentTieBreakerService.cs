@@ -14,7 +14,7 @@ namespace Versus.Services
             _context = context;
         }
 
-        public async Task<List<TournamentTieBreakerDto>> getTournamentTieBreaker()
+        public async Task<List<TournamentTieBreakerDto>> getTournamentTieBreakersAsync()
         {
             List<TournamentTieBreaker> tieBreakerList = await _context.TournamentTieBreaker.ToListAsync();
 
