@@ -1,0 +1,8 @@
+﻿namespace Versus.Dtos.Tournament
+{
+    public class TournamentStatusDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+}

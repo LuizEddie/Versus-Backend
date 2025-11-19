@@ -106,6 +106,8 @@ public class Program
         builder.Services.AddScoped<MatchService>();
         builder.Services.AddScoped<TournamentTieBreakerService>();
         builder.Services.AddScoped<TournamentWinConditionService>();
+        builder.Services.AddScoped<TournamentStatusService>();
+        builder.Services.AddScoped<TournamentTypeService>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
