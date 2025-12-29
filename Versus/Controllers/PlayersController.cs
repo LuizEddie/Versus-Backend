@@ -49,5 +49,21 @@ namespace Versus.Controllers
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
         }
+
+        // DELETE: api/Players/5
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeletePlayer(int id)
+        {
+            try
+            {
+                await _playerService.DeletePlayerAsync(id);
+                return Ok(new ResponseDto { Success = true, Message = "Competidor removido com sucesso!" });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
     }
 }

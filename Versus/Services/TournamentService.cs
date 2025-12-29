@@ -64,6 +64,8 @@ namespace Versus.Services
             {
                 Id = t.Id,
                 Name = t.Name,
+                CreatedAt = t.CreatedAt,
+                FinishedAt = t.FinishedAt,
                 UserDetails = new Dtos.User.UserDetailsDto
                 {
                     Id = t.User.Id,

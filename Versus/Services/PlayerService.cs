@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Versus.Data;
 using Versus.Dtos.Tournament;
 using Versus.Models.Tournament;
@@ -35,6 +36,16 @@ namespace Versus.Services
             {
                 throw new DbConcurrencyException(ex.Message);
             }
+        }
+
+        public async Task DeletePlayerAsync(int id)
+        {
+            Player player = await _context.Players.FirstOrDefaultAsync(x => x.Id == id) ?? throw new TournamentException("Competidor não encontrado");
+
+            _context.Players.Remove(player);
+            await _context.SaveChangesAsync();
+
+
         }
     }
 }
