@@ -13,6 +13,6 @@ namespace Versus.Dtos.Tournament
         public int? QtyRounds { get; set; }
         public TournamentTieBreaker? TieBreaker { get; set; }
         public TournamentType Type { get; set; }
-        public int QtyGroups { get; set; }
+        public int? QtyGroups { get; set; }
     }
 }

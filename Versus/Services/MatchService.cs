@@ -126,7 +126,6 @@ namespace Versus.Services
         public async Task<MatchDetailsDto> FindSingleMatchAsync(MatchFilterDto dto)
         {
             var query = _context.Matches.AsQueryable();
-            Console.WriteLine(dto.Id);
             if (dto.Id.HasValue) query = query.Where(x => x.Id == dto.Id);
             if (!string.IsNullOrWhiteSpace(dto.Phase)) query = query.Where(x => x.Phase == dto.Phase);
             if (!string.IsNullOrWhiteSpace(dto.Round)) query = query.Where(x => x.Round == dto.Round);

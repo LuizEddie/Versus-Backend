@@ -86,6 +86,7 @@ namespace Versus.Services
                     PointsPerLose = t.TournamentSpec.PointsPerLose,
                     PointsPerWin = t.TournamentSpec.PointsPerWin,
                     QtyRounds = t.TournamentSpec.QtyRounds,
+                    QtyGroups = t.TournamentSpec.QtyGroups,
                     TieBreaker = t.TournamentSpec.TieBreaker,
                     WinCondition = t.TournamentSpec.WinCondition,
                     Type = t.TournamentSpec.Type
@@ -145,7 +146,7 @@ namespace Versus.Services
                 {
                     Id = p.Id,
                     Name = p.Name
-                }).ToList(),
+                }).OrderBy(p => p.Id).ToList(),
                 TournamentSpecs = new TournamentSpecsDetailsDto
                 {
                     Id = tournament.TournamentSpec.Id,
@@ -156,7 +157,8 @@ namespace Versus.Services
                     QtyRounds = tournament.TournamentSpec.QtyRounds,
                     TieBreaker = tournament.TournamentSpec.TieBreaker,
                     WinCondition = tournament.TournamentSpec.WinCondition,
-                    Type = tournament.TournamentSpec.Type
+                    Type = tournament.TournamentSpec.Type,
+                    QtyGroups = tournament.TournamentSpec.QtyGroups
                 },
                 TournamentStatus = tournament.Status,
                 MatchDetails = tournament.Matches.Select(m => new MatchDetailsDto

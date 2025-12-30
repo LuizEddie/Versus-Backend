@@ -28,7 +28,8 @@ namespace Versus.Services
                 if (dto.QtyRounds.HasValue) tournamentSpec.QtyRounds = dto.QtyRounds.Value;
                 if (dto.WinConditionId.HasValue) tournamentSpec.WinConditionId = dto.WinConditionId.Value;
                 if (dto.TieBreakerId.HasValue) tournamentSpec.TieBreakerId = dto.TieBreakerId.Value;
-                if (dto.MatchDuration.HasValue) tournamentSpec.MatchDuration = dto.MatchDuration.Value; 
+                if (dto.MatchDuration.HasValue) tournamentSpec.MatchDuration = dto.MatchDuration.Value;
+                if (dto.QtyGroups.HasValue) tournamentSpec.QtyGroups= dto.QtyGroups.Value;
 
                 await _context.SaveChangesAsync();
             }

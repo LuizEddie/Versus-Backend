@@ -27,7 +27,7 @@ namespace Versus.Controllers
             try
             {
                 await _tournamentSpecService.UpdateSpecAsync(dto, id);
-                return Ok(new ResponseDto { Success = true, Message = "Especificações atualizadas com sucesso!" });
+                return Ok(new ResponseDto { Success = true, Message = "Especificações atualizadas com sucesso!"});
             }
             catch (Exception ex)
             {

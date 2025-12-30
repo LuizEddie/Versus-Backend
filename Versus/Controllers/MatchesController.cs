@@ -39,8 +39,16 @@ namespace Versus.Controllers
         [Authorize]
         public async Task<IActionResult> CreateFirstKnockoutMatches(int tournamentId)
         {
-            await _matchService.CreateFirstKnockoutStageMatchesAsync(tournamentId);
-            return Ok(new ResponseDto { Success = true, Message = "Primeira rodada do mata-mata criada com sucesso!"});
+            try
+            {
+                await _matchService.CreateFirstKnockoutStageMatchesAsync(tournamentId);
+                return Ok(new ResponseDto { Success = true, Message = "Primeira rodada do mata-mata criada com sucesso!" });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+
         }
 
         //GET: api/Matches/FindSingleMatch
