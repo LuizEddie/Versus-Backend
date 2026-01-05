@@ -20,5 +20,23 @@ namespace Versus.Data
         public DbSet<TournamentSpec> TournamentSpecs { get; set; } = default!;
         public DbSet<TournamentTieBreaker> TournamentTieBreaker { get; set; } = default!;
         public DbSet<TournamentWinConditon> TournamentWinConditon { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Player>()
+                .HasOne(p => p.Tournament)
+                .WithMany(t => t.Players)
+                .HasForeignKey(p => p.TournamentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Tournament>()
+                .HasOne(t => t.Winner)
+                .WithMany()
+                .HasForeignKey(t => t.WinnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        }
     }
 }

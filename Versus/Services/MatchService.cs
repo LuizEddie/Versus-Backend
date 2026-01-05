@@ -37,22 +37,6 @@ namespace Versus.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task SetMatchWinnerAsync(int id, int winnerId)
-        {
-
-            var result = await _context.Matches.Where(x => x.Id == id).FirstOrDefaultAsync() ?? throw new TournamentException("Partida não encontrada!");
-
-            try
-            {
-                result.WinnerId = winnerId;
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                throw new DbConcurrencyException(ex.Message);
-            }
-        }
-
         public async Task UpdateMatchAsync(int id, UpdateMatchDto dto)
         {
             var result = await _context.Matches.Where(x => x.Id == id).FirstOrDefaultAsync() ?? throw new TournamentException("Partida não encontrada!");
@@ -75,49 +59,100 @@ namespace Versus.Services
             }
         }
 
-        public async Task CreateFirstKnockoutStageMatchesAsync(int tournamentId)
+        public async Task CreateKnockoutTournamentAsync(int tournamentId)
         {
             var rnd = new Random();
-            var players = await _context.Players.Where(x => x.TournamentId == tournamentId).ToListAsync() ?? throw new TournamentException("Jogadores não encontrados!");
-            var specs = await _context.TournamentSpecs.Where(x => x.TournamentId == tournamentId).FirstOrDefaultAsync() ?? throw new TournamentException("Especificações do torneio não encontrados!");
-            int group = specs.QtyGroups == null || specs.QtyGroups == 0 ? 1 : (int)specs.QtyGroups;
+            var players = await _context.Players.Where(x => x.TournamentId == tournamentId).ToListAsync() ?? throw new TournamentException("Jogadores não encontrados");
 
             players = players.OrderBy(x => rnd.Next()).ToList();
 
-            var parts = SplitIntoParts(players, group).ToList();
-
             List<Match> matches = new List<Match>();
 
-            //calcular round
-            int totalMatches = (players.Count() + 1) / 2;
-            string round = totalMatches switch
+            int totalPlayers = players.Count;
+
+            int nextPowerOfTwo = 1;
+
+            while(nextPowerOfTwo < totalPlayers)
             {
-                1 => "Final",
-                2 => "Semifinal",
-                _ => $"{totalMatches}ª"
-            };
+                nextPowerOfTwo *= 2;
+            }
+            
+            int byes = nextPowerOfTwo - totalPlayers;
 
-            for (int i = 0; i < parts.Count(); i++)
+            int firstRoundMatches = (totalPlayers - byes) / 2;
+
+            int totalMatches = nextPowerOfTwo / 2;
+
+            string firstRoundName = GetRoundName(totalMatches);
+
+            int key = 1;
+            int idx = 0;
+
+            for(int i = 0; i < firstRoundMatches; i++)
             {
-                var part = parts[i];
-                for (int j = 0; j < part.Count; j += 2)
-                {
-                    Match match = new Match();
-                    match.Player1Id = part[j].Id;
-                    match.Player2Id = (j + 1 < part.Count) ? part[j + 1].Id : (int?)null;
+                matches.Add(
+                    new Match
+                    {
+                        Player1Id = players[idx++].Id,
+                        Player2Id = players[idx++].Id,
+                        TournamentId = tournamentId,
+                        Group = 0,
+                        Round = firstRoundName,
+                    });
+            }
 
-                    match.TournamentId = tournamentId;
-                    match.Group = i;
-                    match.Round = round;
+            for(int i = 0; i < byes; i++)
+            {
+                matches.Add(
+                   new Match
+                   {
+                       Player1Id = players[idx++].Id,
+                       Player2Id = null,
+                       TournamentId = tournamentId,
+                       Group = 0,
+                       Round = firstRoundName,
+                   });
+            }
 
-                    matches.Add(match);
+            matches = matches.OrderBy(x => rnd.Next()).ToList();
+
+            for(int i = 0; i < matches.Count; i++)
+            {
+                matches[i].Key = key.ToString();
+                key++;
+            }
+
+            totalMatches = totalMatches / 2;
+
+            while (totalMatches >= 1)
+            {
+                string round = GetRoundName(totalMatches);
+
+                key = 1;
+
+                    for (int i = 0; i < totalMatches; i++)
+                    {
+                        Match match = new Match();
+                        match.Player1Id = (int?)null;
+                        match.Player2Id = (int?)null;
+
+                        match.TournamentId = tournamentId;
+                        match.Group = 0;
+                        match.Round = round;
+                        match.Key = key.ToString();
+
+                        matches.Add(match);
+                        key += 1;
                 }
+
+                if (totalMatches == 1) break;
+
+                totalMatches = totalMatches / 2;
+
             }
 
-            for (int i = 0; i < matches.Count(); i++)
-            {
-                matches[i].Key = (i + 1).ToString();
-            }
+            //Avançar os Byes
+
 
             _context.Matches.AddRange(matches);
             await _context.SaveChangesAsync();
@@ -166,6 +201,18 @@ namespace Versus.Services
             {
                 yield return list.Skip(i * size).Take(size).ToList();
             }
+        }
+
+        private static string GetRoundName(int matches)
+        {
+            return matches switch
+            {
+                1 => "Final",
+                2 => "Semifinal",
+                4 => "Quartas",
+                8 => "Oitavas",
+                _ => $"{matches}-avos"
+            };
         }
 
     }

@@ -6,5 +6,6 @@ namespace Versus.Dtos.Tournament
     {
         public string? Name { get; set; }
         public int? StatusId { get; set; }
+        public int? WinnerId { get; set; }
     }
 }

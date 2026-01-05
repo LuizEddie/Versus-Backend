@@ -218,11 +218,16 @@ namespace Versus.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("WinnerId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("WinnerId");
 
                     b.ToTable("Tournaments");
                 });
@@ -473,9 +478,16 @@ namespace Versus.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Versus.Models.Tournament.Player", "Winner")
+                        .WithMany()
+                        .HasForeignKey("WinnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Status");
 
                     b.Navigation("User");
+
+                    b.Navigation("Winner");
                 });
 
             modelBuilder.Entity("Versus.Models.Tournament.TournamentSpec", b =>

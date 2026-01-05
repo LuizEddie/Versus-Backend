@@ -56,6 +56,7 @@ namespace Versus.Services
                 .Include(x => x.User)
                 .Include(x => x.Status)
                 .Include(x => x.Matches)
+                .Include(x => x.Winner)
                 .Where(x => x.UserId == userId)
                 .Where(x => x.IsDeleted == false)
                 .ToListAsync();
@@ -72,6 +73,11 @@ namespace Versus.Services
                     Name = t.User.Name,
                     Email = t.User.Email,
                     PhotoPath = t.User.PhotoPath
+                },
+                WinnerDetails = t.Winner == null ? null : new PlayerDetailsDto
+                {
+                    Id = t.Winner.Id,
+                    Name = t.Winner.Name,
                 },
                 PlayerDetails = t.Players.Select(p => new PlayerDetailsDto
                 {
@@ -127,6 +133,7 @@ namespace Versus.Services
                     .ThenInclude(x => x.Player2)
                 .Include(x => x.Matches)
                     .ThenInclude(x => x.Winner)
+                .Include(x => x.Winner)
                .Where(x => x.Id == id)
                .Where(x => x.IsDeleted == false)
                .FirstOrDefaultAsync() ?? throw new TournamentException("Torneio não encontrado");
@@ -147,6 +154,11 @@ namespace Versus.Services
                     Id = p.Id,
                     Name = p.Name
                 }).OrderBy(p => p.Id).ToList(),
+                WinnerDetails = tournament.Winner == null ? null : new PlayerDetailsDto 
+                {
+                  Id = tournament.Winner.Id,
+                  Name = tournament.Winner.Name,
+                },
                 TournamentSpecs = new TournamentSpecsDetailsDto
                 {
                     Id = tournament.TournamentSpec.Id,
@@ -186,9 +198,11 @@ namespace Versus.Services
             {
                 tournament.UpdatedAt = DateTime.UtcNow;
                 if (!string.IsNullOrEmpty(dto.Name)) tournament.Name = dto.Name;
+                if (dto.WinnerId.HasValue) tournament.WinnerId = dto.WinnerId.Value;
                 if (dto.StatusId.HasValue) tournament.StatusId = dto.StatusId.Value;
                 if (dto.StatusId.HasValue && dto.StatusId.Value == 2) tournament.FinishedAt = DateTime.UtcNow;
                 if (dto.StatusId.HasValue && dto.StatusId.Value == 0) throw new TournamentException("Status do torneio é obrigatório!");
+                if (dto.StatusId.HasValue && dto.StatusId.Value == 2 && !dto.WinnerId.HasValue) throw new TournamentException("O vencedor é obrigatório!");
 
                 await _context.SaveChangesAsync();
             }

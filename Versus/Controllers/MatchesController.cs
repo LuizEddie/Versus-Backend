@@ -41,7 +41,7 @@ namespace Versus.Controllers
         {
             try
             {
-                await _matchService.CreateFirstKnockoutStageMatchesAsync(tournamentId);
+                await _matchService.CreateKnockoutTournamentAsync(tournamentId);
                 return Ok(new ResponseDto { Success = true, Message = "Primeira rodada do mata-mata criada com sucesso!" });
             }
             catch(Exception ex)
