@@ -103,14 +103,16 @@ namespace Versus.Services
 
             for(int i = 0; i < byes; i++)
             {
+                int player = players[idx++].Id;
                 matches.Add(
                    new Match
                    {
-                       Player1Id = players[idx++].Id,
+                       Player1Id = player,
                        Player2Id = null,
                        TournamentId = tournamentId,
                        Group = 0,
                        Round = firstRoundName,
+                       WinnerId = player
                    });
             }
 
@@ -152,7 +154,27 @@ namespace Versus.Services
             }
 
             //Avançar os Byes
+            List<Match> byesMatches = matches.Where(x => (x.Player1Id != null && x.Player2Id == null) && x.Round == firstRoundName).ToList();
+            string nextRound = GetNextRound(firstRoundName);
+            List<Match> nextRoundMatches = matches.Where(x => (x.Round == nextRound)).ToList();
 
+            for (int i = 0; i < byesMatches.Count; i++)
+            {
+                Match matchData = byesMatches[i];
+                
+                if(matchData.Key is null) continue;
+
+                int matchKey = int.Parse(matchData.Key);
+                string nextMatchKey = (matchKey % 2 == 0 ? matchKey / 2 : (matchKey + 1) / 2).ToString();
+                
+                Match? nextMatch = nextRoundMatches.Where(x => (x.Key == nextMatchKey)).FirstOrDefault();
+
+                if(nextMatch is  null) continue;
+
+                if (matchKey % 2 == 0) nextMatch.Player2Id = matchData.WinnerId;
+                if (matchKey % 2 != 0) nextMatch.Player1Id = matchData.WinnerId;
+
+            }
 
             _context.Matches.AddRange(matches);
             await _context.SaveChangesAsync();
@@ -212,6 +234,18 @@ namespace Versus.Services
                 4 => "Quartas",
                 8 => "Oitavas",
                 _ => $"{matches}-avos"
+            };
+        }
+
+        private static string GetNextRound(string round)
+        {
+            return round switch
+            {
+                "Semifinal" => "Final",
+                "Quartas" => "Semifinal",
+                "Oitavas" => "Quartas",
+                "16-avos" => "Oitavas",
+                _ => $"{(int.Parse(round.Replace("-avos", "")) / 2).ToString()}-avos",
             };
         }
 
