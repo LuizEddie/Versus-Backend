@@ -46,21 +46,20 @@ namespace Versus.Services
             await _context.SaveChangesAsync();
         }
 
-        //public async Task UpdateAsync(User user)
-        //{
-        //    if(!await _context.User.AnyAsync(e => e.Id == user.Id)) throw new NotFoundException("Usuário não encontrado");
+        public async Task UpdateAsync(UserUpdateDto user, int id)
+        {
+            if (!await _context.User.AnyAsync(e => e.Id == id)) throw new NotFoundException("Usuário não encontrado");
 
-        //    try
-        //    {
-        //        user.UpdatedAt = DateTime.UtcNow;
-        //        _context.Update(user);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch(DbUpdateConcurrencyException e)
-        //    {
-        //        throw new DbConcurrencyException(e.Message);
-        //    }
-        //}
+            try
+            {
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException e)
+            {
+                throw new DbConcurrencyException(e.Message);
+            }
+        }
 
         public async Task UpdatePasswordAsync(UserUpdatePasswordDto dto)
         {

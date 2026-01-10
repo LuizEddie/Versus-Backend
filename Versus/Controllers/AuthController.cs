@@ -88,7 +88,6 @@ namespace Versus.Controllers
 
         //POST: api/Auth/logout
         [HttpPost("logout")]
-        [Authorize]
         public async Task<IActionResult> Logout()
         {
             try

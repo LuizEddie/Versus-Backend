@@ -55,36 +55,20 @@ namespace Versus.Controllers
             return Ok(new ResponseDto { Success = true, Message = "Usuário encontrado", Data = user});
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutUser(int id, User user)
-        //{
-        //    if (id != user.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(user).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!UserExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
+        // PATCH: api/Users/5
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto user, int id)
+        {
+            try
+            {
+                await _userService.UpdateAsync(user, id);
+                return Ok(new ResponseDto { Success = true, Message = "Usuário atualizado com sucesso" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
