@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Versus.Data;
 using Versus.Dtos;
 using Versus.Dtos.User;
+using Versus.Extensions;
 using Versus.Models;
 using Versus.Services;
 
@@ -55,8 +56,28 @@ namespace Versus.Controllers
             return Ok(new ResponseDto { Success = true, Message = "Usuário encontrado", Data = user});
         }
 
+        // GET: api/Users/Me
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<UserDetailsDto>> GetUserByAccessTokenId()
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var user = await _userService.GetUserDataAsync(userId);
+
+                if (user == null) return NotFound(new ResponseDto { Success = false, Message = "Usuário não encontrado!" });
+
+                return Ok(new ResponseDto { Success = true, Message = "Usuário encontrado", Data = user });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
         // PATCH: api/Users/5
         [HttpPatch("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto user, int id)
         {
             try
@@ -67,6 +88,25 @@ namespace Versus.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        // PATCH: api/User/update-profile-picture
+        [HttpPatch("update-profile-picture")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfilePicture(IFormFile file)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                string url = await _userService.UploadProfileImageAsync(userId, file);
+
+                return Ok(new ResponseDto { Success = true, Message = "Foto atualizada com sucesso!", Data = new { profileUrl = url } });
+            }
+            catch (Exception ex) 
+            { 
+                return BadRequest(new ResponseDto { Success=false, Message = ex.Message });
             }
         }
 
