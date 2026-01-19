@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Versus.Data;
 using Versus.Dtos;
 using Versus.Dtos.User;
+using Versus.Extensions;
 using Versus.Services;
 using Versus.Services.Exceptions;
 
@@ -52,6 +53,28 @@ namespace Versus.Controllers
                 await _resetPasswordService.MarkTokensAsUsedByEmailAsync(validated.Email);
 
                 return Ok(new ResponseDto { Success = true, Message = "Senha atualizada com sucesso!"});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        // PATCH: api/ResetPasswords/me/update-password
+        [HttpPatch("me/update-password")]
+        public async Task<IActionResult> UpdatePasswordById([FromBody] UserReceivePasswordDto dto) //Fazer um dto aqui
+        {
+            try
+            {
+
+
+                if (dto.Password != dto.ConfirmPassword) throw new UserException("As senhas não são iguais!");
+                
+                var userId = User.GetUserId();
+                
+                await _userService.UpdatePasswordByIdAsync(dto, userId);
+
+                return Ok(new ResponseDto { Success = true, Message = "Senha atualizada com sucesso!" });
             }
             catch (Exception ex)
             {

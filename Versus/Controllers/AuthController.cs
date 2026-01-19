@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Versus.Dtos;
 using Versus.Dtos.User;
+using Versus.Extensions;
 using Versus.Models;
 using Versus.Services;
 
@@ -111,6 +112,38 @@ namespace Versus.Controllers
 
                 return Ok(new ResponseDto { Success = true, Message = "Logout realizado com sucesso!"});
 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
+            }
+        }
+
+        //POST: api/Auth/global-logout
+        [HttpPost("global-logout")]
+        public async Task<IActionResult> GlobalLogout()
+        {
+            try
+            {
+                if (!Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue)) return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token Ausente" });
+
+                var storedToken = await _authService.GetRefreshTokenAsync(refreshTokenValue);
+
+                if (storedToken == null || storedToken.IsRevoked) return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
+
+                if (storedToken.ExpiresAt < DateTime.UtcNow)
+                {
+                    await _authService.RevokeRefreshTokenAsync(refreshTokenValue);
+                    return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
+                }
+
+                var userId = User.GetUserId();
+
+                await _authService.RevokeAllRefreshTokenByUserIdAsync(userId);
+
+                Response.Cookies.Delete("refreshToken");
+
+                return Ok(new ResponseDto { Success = true, Message = "Logout realizado com sucesso!" });
             }
             catch (Exception ex)
             {

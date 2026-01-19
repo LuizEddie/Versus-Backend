@@ -91,8 +91,8 @@ namespace Versus.Controllers
             }
         }
 
-        // PATCH: api/User/update-profile-picture
-        [HttpPatch("update-profile-picture")]
+        // PATCH: api/User/me/update-profile-picture
+        [HttpPatch("me/update-profile-picture")]
         [Authorize]
         public async Task<IActionResult> UpdateProfilePicture(IFormFile file)
         {
@@ -107,6 +107,24 @@ namespace Versus.Controllers
             catch (Exception ex) 
             { 
                 return BadRequest(new ResponseDto { Success=false, Message = ex.Message });
+            }
+        }
+
+        // PATCH: api/Users/me/update-user-data
+        [HttpPatch("me/update-user-data")]
+        [Authorize]
+        public async Task<IActionResult> UpdateUserData([FromBody] UserUpdateDto user)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                await _userService.UpdateAsync(user, userId);
+                return Ok(new ResponseDto { Success = true, Message = "Usuário atualizado com sucesso" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
             }
         }
 

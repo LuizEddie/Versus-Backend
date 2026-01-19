@@ -5,6 +5,7 @@ using Versus.Data;
 using Versus.Dtos;
 using Versus.Dtos.User;
 using Versus.Models;
+using Versus.Models.Tournament;
 using Versus.Services.Exceptions;
 
 namespace Versus.Services
@@ -52,11 +53,15 @@ namespace Versus.Services
 
         public async Task UpdateAsync(UserUpdateDto user, int id)
         {
-            if (!await _context.User.AnyAsync(e => e.Id == id)) throw new NotFoundException("Usuário não encontrado");
+            User userData = await _context.User.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Usuário não encontrado");
 
             try
-            {
-                _context.Update(user);
+            {   
+                if(user.Name != userData.Name && !string.IsNullOrEmpty(user.Name)) userData.Name = user.Name;
+                if(user.IsDeleted.HasValue) userData.IsDeleted = user.IsDeleted.Value;
+                if(user.IsDeleted.HasValue && user.IsDeleted.Value == true) userData.DeletedAt = DateTime.UtcNow;
+                if(user.IsActive.HasValue) userData.IsActive = user.IsActive.Value;
+                userData.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException e)
@@ -87,11 +92,31 @@ namespace Versus.Services
             }
         }
 
+        public async Task UpdatePasswordByIdAsync(UserReceivePasswordDto dto, int id)
+        {
+            User user = await _context.User.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Usuário não encontrado");
+
+            try
+            {
+                user.UpdatedAt = DateTime.UtcNow;
+                user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                user.IsActive = true;
+
+                await _context.SaveChangesAsync();
+
+                await _authService.RevokeAllRefreshTokenByUserIdAsync(user.Id);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new DbConcurrencyException(ex.Message);
+            }
+        }
+
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _context.User.Where(e => e.Email == email && e.IsDeleted == false)
                                            .OrderByDescending(e => e.Id)
-                                           .FirstOrDefaultAsync() ?? throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+                                           .FirstOrDefaultAsync() ?? throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Esqueci a Senha!");
         }
 
         public async Task<IEnumerable<UserDetailsDto>> GetUsersByParamsAsync(UserFilterDto dto)
@@ -127,11 +152,11 @@ namespace Versus.Services
         {
             var user = await GetUserByEmailAsync(dto.Email);
 
-            if (user.IsActive == false) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+            if (user.IsActive == false) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Esqueci a Senha!");
 
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
 
-            if (!isPasswordValid) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Recuperar Senha!");
+            if (!isPasswordValid) throw new NotFoundException("Usuário ou senha incorretos. Caso tenha se esquecido das suas credenciais, por favor clique em Esqueci a Senha!");
 
             return new UserDetailsDto { Email = user.Email, Name = user.Name, Id = user.Id, PhotoPath = user.PhotoPath };
         }
