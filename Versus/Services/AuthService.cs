@@ -37,7 +37,7 @@ namespace Versus.Services
                     issuer: jwtSettings["Issuer"],
                     audience: jwtSettings["Audience"],
                     claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(15),
+                    expires: DateTime.UtcNow.AddMinutes(2),
                     signingCredentials: creds
                 );
             return new JwtSecurityTokenHandler().WriteToken(token);

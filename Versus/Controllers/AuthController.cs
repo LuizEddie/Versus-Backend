@@ -93,20 +93,16 @@ namespace Versus.Controllers
         {
             try
             {
-  
-                if (!Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue)) return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token Ausente" });
-
-                var storedToken = await _authService.GetRefreshTokenAsync(refreshTokenValue);
-
-                if (storedToken == null || storedToken.IsRevoked) return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
-
-                if (storedToken.ExpiresAt < DateTime.UtcNow)
+                if(Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue))
                 {
-                    await _authService.RevokeRefreshTokenAsync(refreshTokenValue);
-                    return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
-                }
+                    var storedToken = await _authService.GetRefreshTokenAsync(refreshTokenValue);
 
-                await _authService.RevokeRefreshTokenAsync(refreshTokenValue);
+                    if (storedToken != null && !storedToken.IsRevoked)
+                    {
+                        await _authService.RevokeRefreshTokenAsync(refreshTokenValue);
+                    }
+
+                }
 
                 Response.Cookies.Delete("refreshToken");
 
@@ -125,18 +121,6 @@ namespace Versus.Controllers
         {
             try
             {
-                if (!Request.Cookies.TryGetValue("refreshToken", out var refreshTokenValue)) return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token Ausente" });
-
-                var storedToken = await _authService.GetRefreshTokenAsync(refreshTokenValue);
-
-                if (storedToken == null || storedToken.IsRevoked) return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
-
-                if (storedToken.ExpiresAt < DateTime.UtcNow)
-                {
-                    await _authService.RevokeRefreshTokenAsync(refreshTokenValue);
-                    return BadRequest(new ResponseDto { Success = false, Message = "Refresh Token inválido ou expirado." });
-                }
-
                 var userId = User.GetUserId();
 
                 await _authService.RevokeAllRefreshTokenByUserIdAsync(userId);
