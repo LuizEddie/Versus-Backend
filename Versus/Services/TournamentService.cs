@@ -28,12 +28,6 @@ namespace Versus.Services
                 Players = dto.Players?.Select(p => new Player { Name = p.Name }).ToList(),
                 TournamentSpec = new TournamentSpec
                 {
-                    MatchDuration = dto.TournamentSpec.MatchDuration,
-                    PointsPerDraw = dto.TournamentSpec.PointsPerDraw,
-                    PointsPerLose = dto.TournamentSpec.PointsPerLose,
-                    PointsPerWin = dto.TournamentSpec.PointsPerWin,
-                    QtyRounds = dto.TournamentSpec.QtyRounds,
-                    TieBreakerId = dto.TournamentSpec.TieBreakerId,
                     WinConditionId = dto.TournamentSpec.WinConditionId,
                     TypeId = dto.TournamentSpec.TypeId.Value
                 }
@@ -51,8 +45,6 @@ namespace Versus.Services
                     .ThenInclude(x => x.Type)
                 .Include(x => x.TournamentSpec)
                     .ThenInclude(x => x.WinCondition)
-                .Include(x => x.TournamentSpec)
-                    .ThenInclude(x => x.TieBreaker)
                 .Include(x => x.User)
                 .Include(x => x.Status)
                 .Include(x => x.Matches)
@@ -87,13 +79,6 @@ namespace Versus.Services
                 TournamentSpecs = new TournamentSpecsDetailsDto
                 {
                     Id = t.TournamentSpec.Id,
-                    MatchDuration = t.TournamentSpec.MatchDuration,
-                    PointsPerDraw = t.TournamentSpec.PointsPerDraw,
-                    PointsPerLose = t.TournamentSpec.PointsPerLose,
-                    PointsPerWin = t.TournamentSpec.PointsPerWin,
-                    QtyRounds = t.TournamentSpec.QtyRounds,
-                    QtyGroups = t.TournamentSpec.QtyGroups,
-                    TieBreaker = t.TournamentSpec.TieBreaker,
                     WinCondition = t.TournamentSpec.WinCondition,
                     Type = t.TournamentSpec.Type
                 },
@@ -101,9 +86,7 @@ namespace Versus.Services
                 MatchDetails = t.Matches.Select(m => new MatchDetailsDto
                 {
                     Id = m.Id,
-                    Group = m.Group,
                     MatchDate = m.MatchDate,
-                    Phase = m.Phase,
                     Player1 = m.Player1 == null ? null : new PlayerDetailsDto { Id = m.Player1.Id, Name = m.Player1.Name },
                     Player2 = m.Player2 == null ? null : new PlayerDetailsDto { Id = m.Player2.Id, Name = m.Player2.Name },
                     Round = m.Round,
@@ -123,8 +106,6 @@ namespace Versus.Services
                    .ThenInclude(x => x.Type)
                .Include(x => x.TournamentSpec)
                     .ThenInclude(x => x.WinCondition)
-                .Include(x => x.TournamentSpec)
-                    .ThenInclude(x => x.TieBreaker)
                .Include(x => x.User)
                .Include(x => x.Status)
                .Include(x => x.Matches)
@@ -162,23 +143,14 @@ namespace Versus.Services
                 TournamentSpecs = new TournamentSpecsDetailsDto
                 {
                     Id = tournament.TournamentSpec.Id,
-                    MatchDuration = tournament.TournamentSpec.MatchDuration,
-                    PointsPerDraw = tournament.TournamentSpec.PointsPerDraw,
-                    PointsPerLose = tournament.TournamentSpec.PointsPerLose,
-                    PointsPerWin = tournament.TournamentSpec.PointsPerWin,
-                    QtyRounds = tournament.TournamentSpec.QtyRounds,
-                    TieBreaker = tournament.TournamentSpec.TieBreaker,
                     WinCondition = tournament.TournamentSpec.WinCondition,
                     Type = tournament.TournamentSpec.Type,
-                    QtyGroups = tournament.TournamentSpec.QtyGroups
                 },
                 TournamentStatus = tournament.Status,
                 MatchDetails = tournament.Matches.Select(m => new MatchDetailsDto
                 {
                     Id = m.Id,
-                    Group = m.Group,
                     MatchDate = m.MatchDate,
-                    Phase = m.Phase,
                     Player1 = m.Player1 == null ? null : new PlayerDetailsDto { Id = m.Player1.Id, Name = m.Player1.Name },
                     Player2 = m.Player2 == null ? null : new PlayerDetailsDto { Id = m.Player2.Id, Name = m.Player2.Name },
                     Round = m.Round,

@@ -24,8 +24,6 @@ namespace Versus.Services
         {
             Match match = new Match
             {
-                Group = dto.Group,
-                Phase = dto.Phase,
                 Player1Id = dto.Player1Id,
                 Player2Id = dto.Player2Id,
                 Round = dto.Round,
@@ -43,13 +41,11 @@ namespace Versus.Services
 
             try
             {
-                if (!string.IsNullOrEmpty(dto.Phase)) result.Phase = dto.Phase;
                 if (!string.IsNullOrEmpty(dto.Round)) result.Round = dto.Round;
                 if (!string.IsNullOrEmpty(dto.Key)) result.Key = dto.Key;
                 if (dto.Player1Id.HasValue) result.Player1Id = dto.Player1Id;
                 if (dto.Player2Id.HasValue) result.Player2Id = dto.Player2Id;
                 if (dto.WinnerId.HasValue) result.WinnerId = dto.WinnerId;
-                if (dto.Group.HasValue) result.Group = dto.Group;
 
                 await _context.SaveChangesAsync();
             }
@@ -96,7 +92,6 @@ namespace Versus.Services
                         Player1Id = players[idx++].Id,
                         Player2Id = players[idx++].Id,
                         TournamentId = tournamentId,
-                        Group = 0,
                         Round = firstRoundName,
                     });
             }
@@ -110,7 +105,6 @@ namespace Versus.Services
                        Player1Id = player,
                        Player2Id = null,
                        TournamentId = tournamentId,
-                       Group = 0,
                        Round = firstRoundName,
                        WinnerId = player
                    });
@@ -139,7 +133,6 @@ namespace Versus.Services
                         match.Player2Id = (int?)null;
 
                         match.TournamentId = tournamentId;
-                        match.Group = 0;
                         match.Round = round;
                         match.Key = key.ToString();
 
@@ -184,12 +177,10 @@ namespace Versus.Services
         {
             var query = _context.Matches.AsQueryable();
             if (dto.Id.HasValue) query = query.Where(x => x.Id == dto.Id);
-            if (!string.IsNullOrWhiteSpace(dto.Phase)) query = query.Where(x => x.Phase == dto.Phase);
             if (!string.IsNullOrWhiteSpace(dto.Round)) query = query.Where(x => x.Round == dto.Round);
             if (!string.IsNullOrWhiteSpace(dto.Key)) query = query.Where(x => x.Key == dto.Key);
             if (dto.MatchDate.HasValue) query = query.Where(x => x.MatchDate == dto.MatchDate);
             if (dto.TournamentId.HasValue) query = query.Where(x => x.TournamentId == dto.TournamentId);
-            if (dto.Group.HasValue) query = query.Where(x => x.Group == dto.Group);
             if (dto.Player1Id.HasValue) query = query.Where(x => x.Player1Id == dto.Player1Id);
             if (dto.Player2Id.HasValue) query = query.Where(x => x.Player2Id == dto.Player2Id);
             if (dto.WinnerId.HasValue) query = query.Where(x => x.WinnerId == dto.WinnerId);
@@ -205,9 +196,7 @@ namespace Versus.Services
             return new MatchDetailsDto()
             {
                 Id = result.Id,
-                Phase = result.Phase,
                 Round = result.Round,
-                Group = result.Group,
                 Key = result.Key,
                 MatchDate = result.MatchDate,
                 Player1 = result.Player1 != null ? new PlayerDetailsDto() { Id = result.Player1.Id, Name = result.Player1.Name } : null,

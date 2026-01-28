@@ -5,7 +5,6 @@ namespace Versus.Models.Tournament
     public class Match
     {
         public int Id { get; set; }
-        public string? Phase { get; set; } //-- útil para pontos corridos
         public string? Round { get; set; } //-- útil para mata-mata, pode ficar nulo em pontos corridos
         public DateTime MatchDate { get; set; } = DateTime.UtcNow;
         public int TournamentId { get; set; }
@@ -16,7 +15,6 @@ namespace Versus.Models.Tournament
         public Player? Player2 { get; set; }
         public int? WinnerId { get; set; }
         public Player? Winner { get; set; }
-        public int? Group {  get; set; }
         public string? Key { get; set; }
     }
 }

@@ -80,41 +80,6 @@ namespace Versus.Migrations
                     b.ToTable("ResetPassword");
                 });
 
-            modelBuilder.Entity("Versus.Models.Tournament.Classification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Draws")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Loses")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TournamentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Wins")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
-
-                    b.HasIndex("TournamentId");
-
-                    b.ToTable("Classifications");
-                });
-
             modelBuilder.Entity("Versus.Models.Tournament.Match", b =>
                 {
                     b.Property<int>("Id")
@@ -123,17 +88,11 @@ namespace Versus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("Group")
-                        .HasColumnType("int");
-
                     b.Property<string>("Key")
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Phase")
-                        .HasColumnType("longtext");
 
                     b.Property<int?>("Player1Id")
                         .HasColumnType("int");
@@ -240,39 +199,16 @@ namespace Versus.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<TimeSpan?>("MatchDuration")
-                        .HasColumnType("time(6)");
-
-                    b.Property<int?>("PointsPerDraw")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PointsPerLose")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PointsPerWin")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("QtyGroups")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("QtyRounds")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TieBreakerId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TournamentId")
                         .HasColumnType("int");
 
                     b.Property<int>("TypeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("WinConditionId")
+                    b.Property<int?>("WinConditionId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TieBreakerId");
 
                     b.HasIndex("TournamentId")
                         .IsUnique();
@@ -405,25 +341,6 @@ namespace Versus.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Versus.Models.Tournament.Classification", b =>
-                {
-                    b.HasOne("Versus.Models.Tournament.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Versus.Models.Tournament.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Player");
-
-                    b.Navigation("Tournament");
-                });
-
             modelBuilder.Entity("Versus.Models.Tournament.Match", b =>
                 {
                     b.HasOne("Versus.Models.Tournament.Player", "Player1")
@@ -492,10 +409,6 @@ namespace Versus.Migrations
 
             modelBuilder.Entity("Versus.Models.Tournament.TournamentSpec", b =>
                 {
-                    b.HasOne("Versus.Models.Tournament.TournamentTieBreaker", "TieBreaker")
-                        .WithMany()
-                        .HasForeignKey("TieBreakerId");
-
                     b.HasOne("Versus.Models.Tournament.Tournament", "Tournament")
                         .WithOne("TournamentSpec")
                         .HasForeignKey("Versus.Models.Tournament.TournamentSpec", "TournamentId")
@@ -510,11 +423,7 @@ namespace Versus.Migrations
 
                     b.HasOne("Versus.Models.Tournament.TournamentWinConditon", "WinCondition")
                         .WithMany()
-                        .HasForeignKey("WinConditionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TieBreaker");
+                        .HasForeignKey("WinConditionId");
 
                     b.Navigation("Tournament");
 

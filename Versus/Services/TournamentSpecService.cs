@@ -21,15 +21,8 @@ namespace Versus.Services
 
             try
             {
-                if (dto.PointsPerWin.HasValue) tournamentSpec.PointsPerWin = dto.PointsPerWin.Value;
-                if (dto.PointsPerDraw.HasValue) tournamentSpec.PointsPerDraw = dto.PointsPerDraw.Value;
-                if (dto.PointsPerLose.HasValue) tournamentSpec.PointsPerLose = dto.PointsPerLose.Value;
                 if (dto.TypeId.HasValue) tournamentSpec.TypeId = dto.TypeId.Value;
-                if (dto.QtyRounds.HasValue) tournamentSpec.QtyRounds = dto.QtyRounds.Value;
                 if (dto.WinConditionId.HasValue) tournamentSpec.WinConditionId = dto.WinConditionId.Value;
-                if (dto.TieBreakerId.HasValue) tournamentSpec.TieBreakerId = dto.TieBreakerId.Value;
-                if (dto.MatchDuration.HasValue) tournamentSpec.MatchDuration = dto.MatchDuration.Value;
-                if (dto.QtyGroups.HasValue) tournamentSpec.QtyGroups= dto.QtyGroups.Value;
 
                 await _context.SaveChangesAsync();
             }
