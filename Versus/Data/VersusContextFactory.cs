@@ -17,7 +17,7 @@ namespace Versus.Data
 
             var connectionString = configuration.GetConnectionString("VersusContext") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
 
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            optionsBuilder.UseNpgsql(connectionString);
             
             return new VersusContext(optionsBuilder.Options);
         }

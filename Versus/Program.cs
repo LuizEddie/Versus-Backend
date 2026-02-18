@@ -16,8 +16,8 @@ public class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
-        ConnectToMySql(builder);
+
+        ConnectToSql(builder);
         AddSecrets(builder);
         AddServices(builder);
 
@@ -48,11 +48,13 @@ public class Program
         app.Run();
     }
 
-    private static void ConnectToMySql(WebApplicationBuilder builder)
+    private static void ConnectToSql(WebApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("VersusContext") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
+
         builder.Services.AddDbContext<VersusContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+            //options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+            options.UseNpgsql(connectionString)
         );
     }
 
