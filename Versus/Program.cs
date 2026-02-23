@@ -50,7 +50,7 @@ public class Program
 
     private static void ConnectToSql(WebApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String 'DefaultConnection' not found.");
 
         builder.Services.AddDbContext<VersusContext>(options =>
             //options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
