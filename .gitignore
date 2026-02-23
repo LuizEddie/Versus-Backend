@@ -367,3 +367,7 @@ Versus/wwwroot/uploads/
 Versus/wwwroot/uploads/**
 wwwroot/uploads/
 wwwroot/uploads/**
+
+# env
+.env
+.env.*

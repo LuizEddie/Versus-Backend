@@ -15,7 +15,7 @@ namespace Versus.Data
 
             var optionsBuilder = new DbContextOptionsBuilder<VersusContext>();
 
-            var connectionString = configuration.GetConnectionString("VersusContext") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
+            var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String 'VersusContext' not found.");
 
             optionsBuilder.UseNpgsql(connectionString);
             
