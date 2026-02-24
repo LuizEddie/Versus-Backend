@@ -9,5 +9,6 @@ Dockerfile*
 **/node_modules
 **/*.log
 **/obj
+certbot/
 LICENSE
 README.md

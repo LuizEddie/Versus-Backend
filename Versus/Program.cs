@@ -10,7 +10,6 @@ using Versus.Dtos;
 using Versus.Helpers;
 using Versus.Services;
 using Versus.Settings;
-
 public class Program
 {
     private static void Main(string[] args)
@@ -25,7 +24,7 @@ public class Program
 
         var app = builder.Build();
 
-        app.UseCors("AllowLocalhost");
+        app.UseCors("AllowFrontend");
 
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
@@ -62,10 +61,10 @@ public class Program
     {
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowLocalhost", policy =>
+            options.AddPolicy("AllowFrontend", policy =>
             {
                 policy
-                .WithOrigins("https://localhost:4200", "http://localhost:4200")
+                .WithOrigins("https://localhost:4200", "http://localhost:4200", "https://apiversus.servehttp.com")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
