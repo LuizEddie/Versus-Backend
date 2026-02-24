@@ -370,4 +370,8 @@ wwwroot/uploads/**
 
 # env
 .env
-.env.*
+
+# Docker / Infra
+cerbot/
+*.pem
+*.key
