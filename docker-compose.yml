@@ -2,7 +2,7 @@ services:
     api:
         build: .
         container_name: versus-api
-        ports:
+        expose:
             - "8080"
         env_file:
             - .env
