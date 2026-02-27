@@ -20,7 +20,7 @@ jobs:
             set -e
 
             echo "Entrando na pasta da aplicação..."
-            cd /home/ubuntu/versus
+            cd /home/deploy/versus
 
             echo "Atualizando código..."
             git fetch origin
