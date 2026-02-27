@@ -40,7 +40,7 @@ namespace Versus.Controllers
                 IsActive = true,
             });
 
-            if(users == null || !users.Any()) return NotFound(new ResponseDto{ Success = false, Message = "Usuários não encontrados!" });
+            if(users == null || !users.Any()) return NotFound(new ResponseDto{ Success = false, Message = "Usuários não encontrados" });
             
             return Ok(new ResponseDto{ Success = true, Message = "Usuários encontrados", Data = users });
         }
