@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Policy;
+using System.Threading.Tasks;
 using Versus.Data;
 using Versus.Dtos;
 using Versus.Dtos.User;
@@ -53,6 +54,8 @@ namespace Versus.Controllers
 
             if (user == null) return NotFound(new ResponseDto { Success = false, Message = "Usuário não encontrado!"});
 
+            user.PhotoPath = string.IsNullOrEmpty(user.PhotoPath) ? null : $"{Request.Scheme}://{Request.Host}/{user.PhotoPath}";
+
             return Ok(new ResponseDto { Success = true, Message = "Usuário encontrado", Data = user});
         }
 
@@ -67,6 +70,8 @@ namespace Versus.Controllers
                 var user = await _userService.GetUserDataAsync(userId);
 
                 if (user == null) return NotFound(new ResponseDto { Success = false, Message = "Usuário não encontrado!" });
+
+                user.PhotoPath = string.IsNullOrEmpty(user.PhotoPath) ? null : $"{Request.Scheme}://{Request.Host}/{user.PhotoPath}";
 
                 return Ok(new ResponseDto { Success = true, Message = "Usuário encontrado", Data = user });
             }
@@ -102,7 +107,9 @@ namespace Versus.Controllers
 
                 string url = await _userService.UploadProfileImageAsync(userId, file);
 
-                return Ok(new ResponseDto { Success = true, Message = "Foto atualizada com sucesso!", Data = new { profileUrl = url } });
+                string finalUrl = $"{Request.Scheme}://{Request.Host}/{url}";
+
+                return Ok(new ResponseDto { Success = true, Message = "Foto atualizada com sucesso!", Data = new { profileUrl = finalUrl } });
             }
             catch (Exception ex) 
             { 

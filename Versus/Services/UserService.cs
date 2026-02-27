@@ -14,14 +14,12 @@ namespace Versus.Services
     {
         private readonly VersusContext _context;
         private readonly AuthService _authService;
-        private readonly string _baseUrl;
         private readonly IWebHostEnvironment _env;
         const long MAX_FILE_SIZE = 3 * 1024 * 1024;
         public UserService(VersusContext context, AuthService authService, IConfiguration config, IWebHostEnvironment env)
         {
             _context = context;
             _authService = authService;
-            _baseUrl = config["App:DevBaseUrl"];
             _env = env;
         }
 
@@ -183,7 +181,8 @@ namespace Versus.Services
             using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            var imgUrl = $"{_baseUrl}/uploads/profile/{fileName}";
+            //var imgUrl = $"{_baseUrl}/uploads/profile/{fileName}";
+            var imgUrl = Path.Combine("uploads", "profile", fileName).Replace("\\", "/");
 
             try
             {
@@ -205,9 +204,7 @@ namespace Versus.Services
         {
             if (string.IsNullOrEmpty(path)) return;
 
-            var relativePath = path.Replace($"{_baseUrl}/", "");
-
-            var fullPath = Path.Combine(_env.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            var fullPath = Path.Combine(_env.WebRootPath, path.Replace("/", Path.DirectorySeparatorChar.ToString()));
 
             if(File.Exists(fullPath)) File.Delete(fullPath);
         }
