@@ -171,7 +171,7 @@ namespace Versus.Services
 
             if (!file.ContentType.StartsWith("image/")) throw new UserException("Somente imagens são permitidas");
 
-            var uploadPath = Path.Combine(_env.WebRootPath,"uploads", "profile");
+            var uploadPath = Path.Combine(_env.ContentRootPath, "uploads", "profile");
 
             if(!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
 
@@ -204,7 +204,7 @@ namespace Versus.Services
         {
             if (string.IsNullOrEmpty(path)) return;
 
-            var fullPath = Path.Combine(_env.WebRootPath, path.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            var fullPath = Path.Combine(_env.ContentRootPath, path.Replace("/", Path.DirectorySeparatorChar.ToString()));
 
             if(File.Exists(fullPath)) File.Delete(fullPath);
         }
