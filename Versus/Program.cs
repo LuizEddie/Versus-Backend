@@ -65,7 +65,7 @@ public class Program
             options.AddPolicy("AllowFrontend", policy =>
             {
                 policy
-                .WithOrigins("https://localhost:4200", "http://localhost:4200", "https://apiversus.servehttp.com", "https://versus-frontend.netlify.app")
+                .WithOrigins("https://localhost:4200", "http://localhost:4200", "https://apiversus.servehttp.com")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
