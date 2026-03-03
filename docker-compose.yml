@@ -8,8 +8,8 @@ services:
         env_file:
             - .env
         restart: always
-        # volumes:
-        #     - uploads_data:/app/wwwroot/uploads
+        volumes:
+            - uploads_data:/app/wwwroot/uploads
     
     nginx:
         image: nginx:latest
@@ -31,5 +31,5 @@ services:
             - ./certbot/www:/var/www/certbot
             - ./certbot/conf:/etc/letsencrypt
 
-# volumes:
-#   uploads_data:
+volumes:
+  uploads_data:
