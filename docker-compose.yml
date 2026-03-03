@@ -9,7 +9,7 @@ services:
             - .env
         restart: always
         volumes:
-            - uploads_data:/app/wwwroot/uploads
+            - ./uploads_data:/app/wwwroot/uploads
     
     nginx:
         image: nginx:latest
@@ -30,6 +30,3 @@ services:
         volumes:
             - ./certbot/www:/var/www/certbot
             - ./certbot/conf:/etc/letsencrypt
-
-volumes:
-  uploads_data:

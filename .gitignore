@@ -363,6 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Arquivos públicos gerados
+uploads_data
 Versus/wwwroot/uploads/
 Versus/wwwroot/uploads/**
 wwwroot/uploads/
