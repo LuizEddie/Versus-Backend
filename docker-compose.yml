@@ -8,6 +8,8 @@ services:
         env_file:
             - .env
         restart: always
+        volumes:
+            - uploads_data:/app/wwwroot/uploads
     
     nginx:
         image: nginx:latest
