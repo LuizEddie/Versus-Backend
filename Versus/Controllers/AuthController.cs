@@ -41,7 +41,7 @@ namespace Versus.Controllers
                     Expires = refreshToken.ExpiresAt
                 });
 
-                return Ok(new ResponseDto { Success = true, Message = "Login efetuado com sucesso!", Data = accessToken });
+                return Ok(new ResponseDto { Success = true, Message = "Login efetuado com sucesso", Data = accessToken });
             }
             catch (Exception ex) { 
                 return Unauthorized(new ResponseDto { Success = true, Message = ex.Message});
