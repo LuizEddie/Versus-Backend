@@ -1,6 +1,7 @@
 services:
     api:
-        build: .
+        image: ghcr.io/LuizEddie/Versus-Backend:latest
+        # build: .
         container_name: versus-api
         expose:
             - "8080"

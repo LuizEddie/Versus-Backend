@@ -1,12 +1,14 @@
 name: Deploy API
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: ["Build and Push Image"]
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -25,9 +27,15 @@ jobs:
             echo "Atualizando código..."
             git fetch origin
             git reset --hard origin/master
-            
-            echo "Rebuild do container..."
-            docker compose up -d --build
+
+            echo "Baixando nova imagem..."
+            docker compose pull
+
+            echo "Subindo containers..."
+            docker compose up -d
+
+            # echo "Rebuild do container..."
+            # docker compose up -d --build
 
             echo "Deploy finalizado"
 
