@@ -27,6 +27,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/LuizEddie/Versus-Backend:latest
+          tags: ghcr.io/LuizEddie/versus-backend:latest
 
 
