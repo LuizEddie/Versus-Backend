@@ -1,6 +1,6 @@
 services:
     api:
-        image: ghcr.io/LuizEddie/versus-backend:latest
+        image: ghcr.io/luizeddie/versus-backend:latest
         # build: .
         container_name: versus-api
         expose:
