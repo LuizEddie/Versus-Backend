@@ -34,6 +34,9 @@ jobs:
             echo "Subindo containers..."
             docker compose up -d
 
+            echo "Reiniciando o NGINX..."
+            docker restart nginx
+
             # echo "Rebuild do container..."
             # docker compose up -d --build
 
