@@ -15,7 +15,7 @@ namespace Versus.Services
             _context = context;
         }
 
-        public async Task InsertTournamentAsync(InsertTournamentDto dto, int userId)
+        public async Task<TournamentDetailsDto> InsertTournamentAsync(InsertTournamentDto dto, int userId)
         {
             if (!dto.TournamentSpec.TypeId.HasValue || dto.TournamentSpec.TypeId.Value == 0) throw new TournamentException("O tipo de torneio é obrigatório");
 
@@ -35,6 +35,8 @@ namespace Versus.Services
 
             _context.Tournaments.Add(tournament);
             await _context.SaveChangesAsync();
+            TournamentDetailsDto createdTournament = new TournamentDetailsDto { Id = tournament.Id, Name = tournament.Name };
+            return createdTournament;
         }
 
         public async Task<List<TournamentDetailsDto>> GetCurrentUserTournamentsAsync(int userId)

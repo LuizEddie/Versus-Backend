@@ -32,9 +32,9 @@ namespace Versus.Controllers
 
                 if (userId == null) return Unauthorized(new ResponseDto { Success = false, Message = "Usuário inválido!" });
 
-                await _tournamentService.InsertTournamentAsync(dto, int.Parse(userId));
+                TournamentDetailsDto tournament = await _tournamentService.InsertTournamentAsync(dto, int.Parse(userId));
 
-                return Created(string.Empty, new ResponseDto { Success = true, Message = "Torneio criado com sucesso!" });
+                return Created(string.Empty, new ResponseDto { Success = true, Message = "Torneio criado com sucesso!", Data = tournament });
             }
             catch (Exception ex)
             {
