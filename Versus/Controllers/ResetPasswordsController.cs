@@ -92,7 +92,7 @@ namespace Versus.Controllers
 
                 await _resetPasswordService.SendRecoverPasswordEmailAsync(new UserCreateDto { Email = user.Email, Name = user.Name });
 
-                return Ok(new ResponseDto { Success = true, Message = "E-mail enviado, por favor verifique a sua caixa de entrada ou spam!"});
+                return Ok(new ResponseDto { Success = true, Message = "E-mail enviado, por favor verifique a sua caixa de entrada ou spam."});
             }
             catch (Exception ex) {
                 return BadRequest(new ResponseDto { Success = false, Message = ex.Message });
