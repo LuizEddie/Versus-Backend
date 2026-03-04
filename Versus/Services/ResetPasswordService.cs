@@ -10,7 +10,6 @@ using Versus.Models;
 using Versus.Models.TemplateModels;
 using Versus.Services.Exceptions;
 using Versus.Settings;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Versus.Services
 {
@@ -20,19 +19,21 @@ namespace Versus.Services
         private readonly EmailService _emailService;
         private readonly TokenSettings _tokenSettings;
         private readonly EmailTemplateService _templateService;
-        public ResetPasswordService(VersusContext context, EmailService emailService, IOptions<TokenSettings> tokenSettings, EmailTemplateService templateService)
+        private readonly string _url;
+        public ResetPasswordService(VersusContext context, EmailService emailService, IOptions<TokenSettings> tokenSettings, EmailTemplateService templateService, IConfiguration config, IWebHostEnvironment env)
         {
             _context = context;
             _emailService = emailService;
             _tokenSettings = tokenSettings.Value;
             _templateService = templateService;
+            _url = config["FrontendSettings:Link"] ?? (env.IsDevelopment() ? "https://localhost:4200" : "https://versus-frontend.netlify.app/");
         }
 
         public async Task SendNewPasswordEmailAsync(UserCreateDto user)
         {
             string userEmail = user.Email;
             string token = await GenerateToken(userEmail);
-            string resetLink = $"http://localhost:4200/auth/confirm-register?token={token}";
+            string resetLink = $"{_url}/auth/confirm-register?token={token}";
 
             var body = await _templateService.RenderTemplateAsync("NewPassword.cshtml", new NewPasswordTemplateModel { ResetLink = resetLink, UserName = user.Name });
 
@@ -44,7 +45,7 @@ namespace Versus.Services
         {
             string userEmail = user.Email;
             string token = await GenerateToken(userEmail);
-            string resetLink = $"http://localhost:4200/auth/confirm-new-password?token={token}";
+            string resetLink = $"{_url}/auth/confirm-new-password?token={token}";
 
             var body = await _templateService.RenderTemplateAsync("RecoverPassword.cshtml", new NewPasswordTemplateModel { ResetLink = resetLink, UserName = user.Name });
 
