@@ -80,7 +80,6 @@ namespace Versus.Services
             int totalMatches = nextPowerOfTwo / 2;
 
             string firstRoundName = GetRoundName(totalMatches);
-
             int key = 1;
             int idx = 0;
 
@@ -109,7 +108,6 @@ namespace Versus.Services
                        WinnerId = player
                    });
             }
-
             matches = matches.OrderBy(x => rnd.Next()).ToList();
 
             for(int i = 0; i < matches.Count; i++)
@@ -230,6 +228,7 @@ namespace Versus.Services
         {
             return round switch
             {
+                "Final" => "Final",
                 "Semifinal" => "Final",
                 "Quartas" => "Semifinal",
                 "Oitavas" => "Quartas",
