@@ -25,6 +25,7 @@ public class Program
 
         var app = builder.Build();
 
+        app.UseHttpsRedirection();
         app.UseCors("AllowFrontend");
 
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -37,8 +38,6 @@ public class Program
         }
 
         app.UseStaticFiles();
-
-        app.UseHttpsRedirection();
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -65,7 +64,7 @@ public class Program
             options.AddPolicy("AllowFrontend", policy =>
             {
                 policy
-                .WithOrigins("https://localhost:4200", "http://localhost:4200", "https://apiversus.servehttp.com")
+                .WithOrigins("https://localhost:4200", "http://localhost:4200", "https://apiversus.servehttp.com", "https://versus-frontend.netlify.app")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();
